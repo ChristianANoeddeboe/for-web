@@ -1,6 +1,7 @@
 import { BiRegularCheckCircle, BiSolidCheckCircle } from "solid-icons/bi";
 import {
   Accessor,
+  For,
   JSX,
   Match,
   Setter,
@@ -17,7 +18,7 @@ import { useDevice } from "@revolt/common";
 import { KeybindAction, createKeybind } from "@revolt/keybinds";
 import { TextWithEmoji } from "@revolt/markdown";
 import { useModals } from "@revolt/modal";
-import { useNavigate } from "@revolt/routing";
+import { useNavigate, useSmartParams } from "@revolt/routing";
 import { useVoice } from "@revolt/rtc";
 import { useState } from "@revolt/state";
 import {
@@ -478,6 +479,21 @@ function Entry(
 
   const inCall = () => props.channel.id === voice.channel()?.id;
 
+  const params = useSmartParams();
+
+  /**
+   * Threads to list under this channel: the ones we joined, and the open one
+   */
+  const threads = createMemo(() =>
+    props.channel.threads
+      .filter(
+        (thread) =>
+          (thread.joined && !thread.archived) ||
+          thread.id === params().threadId,
+      )
+      .sort((a, b) => (a.id < b.id ? -1 : 1)),
+  );
+
   const attentionState = createMemo(() =>
     props.active
       ? "selected"
@@ -501,6 +517,9 @@ function Entry(
         icon={
           <>
             <Switch fallback={<Symbol>grid_3x3</Symbol>}>
+              <Match when={props.channel.type === "ForumChannel"}>
+                <Symbol>forum</Symbol>
+              </Match>
               <Match when={props.channel.isVoice}>
                 <Symbol
                   color={inCall() ? "var(--md-sys-color-primary)" : undefined}
@@ -565,9 +584,55 @@ function Entry(
       </MenuButton>
 
       <VoiceChannelPreview channel={props.channel} />
+
+      <Show when={threads().length}>
+        <Threads>
+          <For each={threads()}>
+            {(thread) => (
+              <MenuButton
+                href={thread.path}
+                use:floating={props.menuGenerator(thread)}
+                size="thin"
+                alert={
+                  params().threadId !== thread.id &&
+                  thread.unread &&
+                  (thread.mentions?.size || true)
+                }
+                attention={
+                  params().threadId === thread.id
+                    ? "selected"
+                    : thread.threadNotify === "None" ||
+                        state.notifications.isChannelMuted(thread)
+                      ? "muted"
+                      : thread.unread
+                        ? "active"
+                        : "normal"
+                }
+                icon={<Symbol size={16}>subdirectory_arrow_right</Symbol>}
+              >
+                <OverflowingText>
+                  <TextWithEmoji content={thread.name!} />
+                </OverflowingText>
+              </MenuButton>
+            )}
+          </For>
+        </Threads>
+      </Show>
     </Column>
   );
 }
+
+/**
+ * Nested list of threads under a channel
+ */
+const Threads = styled("div", {
+  base: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "var(--gap-xs)",
+    paddingInlineStart: "var(--gap-lg)",
+  },
+});
 
 /**
  * Channel icon styling

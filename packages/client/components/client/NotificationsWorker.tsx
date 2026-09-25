@@ -8,6 +8,7 @@ import {
   Message,
   MessagePinnedSystemMessage,
   TextSystemMessage,
+  ThreadCreatedSystemMessage,
   UserModeratedSystemMessage,
   UserSystemMessage,
 } from "stoat.js";
@@ -38,7 +39,12 @@ export function NotificationsWorker() {
     const us = client().user!;
 
     // Ignore if we are currently looking at the channel
-    if (params().channelId === message.channelId && document.hasFocus()) return;
+    if (
+      (params().channelId === message.channelId ||
+        params().threadId === message.channelId) &&
+      document.hasFocus()
+    )
+      return;
 
     // Ignore our own messages
     if (message.author?.self) return;
@@ -49,12 +55,23 @@ export function NotificationsWorker() {
     // Ignore muted channels
     if (state.notifications.isMuted(message.channel)) return;
 
-    // Check channel notification settings
-    switch (state.notifications.computeForChannel(message.channel!)) {
-      case "none":
-        return; // ignore if muted/none
-      case "mention":
-        if (!message.mentioned) return; // ignore if not mentioned
+    if (message.channel!.type === "Thread") {
+      // Threads notify only their members, according to their own setting
+      const notify = message.channel!.threadNotify;
+      if (notify === "None") return;
+      if (
+        !message.mentioned &&
+        (!message.channel!.joined || notify === "Mentions")
+      )
+        return;
+    } else {
+      // Check channel notification settings
+      switch (state.notifications.computeForChannel(message.channel!)) {
+        case "none":
+          return; // ignore if muted/none
+        case "mention":
+          if (!message.mentioned) return; // ignore if not mentioned
+      }
     }
 
     // Ignore if we're busy or focused
@@ -80,7 +97,11 @@ export function NotificationsWorker() {
         }
         break;
       case "TextChannel":
+      case "ForumChannel":
         title = `@${message.username} (#${message.channel?.name}, ${message.channel?.server?.name})`;
+        break;
+      case "Thread":
+        title = `@${message.username} (${message.channel?.name}, #${message.channel?.parent?.name}, ${message.channel?.server?.name})`;
         break;
     }
 
@@ -185,6 +206,15 @@ export function NotificationsWorker() {
             (message.systemMessage as MessagePinnedSystemMessage).by?.username
           } unpinned a message`;
           icon = (message.systemMessage as MessagePinnedSystemMessage).by
+            ?.avatarURL;
+          break;
+        case "thread_created":
+          body = t`${
+            (message.systemMessage as ThreadCreatedSystemMessage).by?.username
+          } started a thread: ${
+            (message.systemMessage as ThreadCreatedSystemMessage).name
+          }`;
+          icon = (message.systemMessage as ThreadCreatedSystemMessage).by
             ?.avatarURL;
           break;
       }

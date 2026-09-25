@@ -1,12 +1,7 @@
 import { For, Match, Show, Switch, createSignal } from "solid-js";
 
 import { useLingui } from "@lingui-solid/solid/macro";
-import {
-  API,
-  Channel,
-  DEFAULT_PERMISSION_DIRECT_MESSAGE,
-  Server,
-} from "stoat.js";
+import { Channel, DEFAULT_PERMISSION_DIRECT_MESSAGE, Server } from "stoat.js";
 import { css } from "styled-system/css";
 import { styled } from "styled-system/jsx";
 
@@ -19,7 +14,20 @@ type Props =
   | { type: "channel_role"; context: Channel; roleId: string }
   | { type: "group"; context: Channel };
 
-type Context = API.Channel["channel_type"] | "Server";
+type Context = Channel["type"] | "Server";
+
+/**
+ * Permissions that only apply to voice channels
+ */
+const VOICE_PERMISSIONS = [
+  "Connect",
+  "Speak",
+  "Video",
+  "MuteMembers",
+  "DeafenMembers",
+  "MoveMembers",
+  "Listen",
+];
 
 /**
  * Generic editor for any channel permissions
@@ -417,6 +425,46 @@ export function ChannelPermissionsEditor(props: Props) {
         Any: t`Mention specific roles`,
       },
     },
+    {
+      heading: t`Threads`,
+      key: "CreatePublicThreads",
+      value: 2n ** 48n,
+      title: t`Create Public Threads`,
+      description: {
+        Server: t`Start threads that everyone can see`,
+        TextChannel: t`Start threads that everyone can see in this channel`,
+        ForumChannel: t`Create posts in this forum`,
+      },
+    },
+    {
+      key: "CreatePrivateThreads",
+      value: 2n ** 49n,
+      title: t`Create Private Threads`,
+      description: {
+        Server: t`Start threads that only invited members can see`,
+        TextChannel: t`Start threads that only invited members can see`,
+      },
+    },
+    {
+      key: "SendMessagesInThreads",
+      value: 2n ** 50n,
+      title: t`Send Messages in Threads`,
+      description: {
+        Server: t`Send messages in threads and forum posts`,
+        TextChannel: t`Send messages in threads of this channel`,
+        ForumChannel: t`Reply to posts in this forum`,
+      },
+    },
+    {
+      key: "ManageThreads",
+      value: 2n ** 51n,
+      title: t`Manage Threads`,
+      description: {
+        Server: t`Rename, close, lock and delete threads and forum posts, and see all private threads`,
+        TextChannel: t`Rename, close, lock and delete threads, and see all private threads`,
+        ForumChannel: t`Rename, close, lock, pin and delete posts`,
+      },
+    },
   ];
 
   /**
@@ -427,6 +475,16 @@ export function ChannelPermissionsEditor(props: Props) {
    */
   function description(entry: (typeof Permissions)[number]) {
     const desc = entry.description;
+    if (context === "ForumChannel") {
+      return (
+        desc.ForumChannel ??
+        (VOICE_PERMISSIONS.includes(entry.key)
+          ? undefined
+          : desc.TextChannel) ??
+        desc.Any
+      );
+    }
+
     return desc[context] ?? desc.Any;
   }
 

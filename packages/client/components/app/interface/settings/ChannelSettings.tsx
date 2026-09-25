@@ -1,7 +1,9 @@
 import {
+  BiRegularChat,
   BiRegularListUl,
   BiSolidCloud,
   BiSolidInfoCircle,
+  BiSolidPurchaseTag,
   BiSolidTrash,
 } from "solid-icons/bi";
 
@@ -14,7 +16,10 @@ import { useModals } from "@revolt/modal";
 import { ColouredText } from "@revolt/ui";
 
 import { SettingsConfiguration } from ".";
+import ForumTags from "./channel/ForumTags";
 import ChannelOverview from "./channel/Overview";
+import ThreadDefaults from "./channel/ThreadDefaults";
+import ThreadOverview from "./channel/ThreadOverview";
 import { ChannelPermissionsEditor } from "./channel/permissions/ChannelPermissionsEditor";
 import { ChannelPermissionsOverview } from "./channel/permissions/ChannelPermissionsOverview";
 import { ViewWebhook } from "./channel/webhooks/ViewWebhook";
@@ -77,12 +82,21 @@ const Config: SettingsConfiguration<Channel> = {
 
     switch (id) {
       case "overview":
-        return <ChannelOverview channel={channel} />;
+        return channel.type === "Thread" ? (
+          <ThreadOverview channel={channel} />
+        ) : (
+          <ChannelOverview channel={channel} />
+        );
+      case "threads":
+        return <ThreadDefaults channel={channel} />;
+      case "tags":
+        return <ForumTags channel={channel} />;
       case "permissions":
         switch (channel.type) {
           case "Group":
             return <ChannelPermissionsEditor type="group" context={channel} />;
           case "TextChannel":
+          case "ForumChannel":
             return <ChannelPermissionsOverview context={channel} />;
           default:
             return null;
@@ -116,7 +130,29 @@ const Config: SettingsConfiguration<Channel> = {
             },
             {
               hidden:
+                !["TextChannel", "ForumChannel"].includes(channel.type) ||
+                !channel.havePermission("ManageChannel"),
+              id: "threads",
+              icon: <BiRegularChat size={20} />,
+              title:
+                channel.type === "ForumChannel" ? (
+                  <Trans>Post Settings</Trans>
+                ) : (
+                  <Trans>Thread Settings</Trans>
+                ),
+            },
+            {
+              hidden:
+                channel.type !== "ForumChannel" ||
+                !channel.havePermission("ManageChannel"),
+              id: "tags",
+              icon: <BiSolidPurchaseTag size={20} />,
+              title: <Trans>Tags</Trans>,
+            },
+            {
+              hidden:
                 channel.type === "SavedMessages" ||
+                channel.type === "Thread" ||
                 !channel.havePermission("ManagePermissions"),
               id: "permissions",
               icon: <BiRegularListUl size={20} />,
@@ -124,8 +160,10 @@ const Config: SettingsConfiguration<Channel> = {
             },
             {
               hidden:
-                !channel.havePermission("ManageWebhooks") &&
-                import.meta.env.DEV,
+                channel.type === "Thread" ||
+                channel.type === "ForumChannel" ||
+                (!channel.havePermission("ManageWebhooks") &&
+                  import.meta.env.DEV),
               id: "webhooks",
               icon: <BiSolidCloud size={20} />,
               title: <Trans>Webhooks</Trans>,

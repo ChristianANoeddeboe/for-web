@@ -127,7 +127,12 @@ export default function ChannelOverview(props: ChannelSettingsProps) {
             label={t`Channel Description`}
             placeholder={t`This channel is about...`}
           />
-          <Show when={props.channel.type === "TextChannel"}>
+          <Show
+            when={
+              props.channel.type === "TextChannel" ||
+              props.channel.type === "ForumChannel"
+            }
+          >
             <Form2.Select
               label={t`Channel Slowmode`}
               control={editGroup.controls.slowmode}

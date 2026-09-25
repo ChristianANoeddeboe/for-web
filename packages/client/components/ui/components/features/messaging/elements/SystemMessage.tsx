@@ -9,6 +9,7 @@ import {
   MessagePinnedSystemMessage,
   SystemMessage as SystemMessageClass,
   TextSystemMessage,
+  ThreadCreatedSystemMessage,
   User,
   UserModeratedSystemMessage,
   UserSystemMessage,
@@ -195,6 +196,21 @@ export function SystemMessage(props: Props) {
             />
           </Trans>
         </Match>
+        <Match when={props.systemMessage.type === "thread_created"}>
+          <Trans>
+            <UserMention
+              userId={(props.systemMessage as ThreadCreatedSystemMessage).byId}
+            />{" "}
+            started a thread:{" "}
+            <ThreadLink
+              href={`/server/${params().serverId}/channel/${params().channelId}/thread/${(props.systemMessage as ThreadCreatedSystemMessage).threadId}`}
+            >
+              {(props.systemMessage as ThreadCreatedSystemMessage).thread
+                ?.name ??
+                (props.systemMessage as ThreadCreatedSystemMessage).name}
+            </ThreadLink>
+          </Trans>
+        </Match>
         <Match when={props.systemMessage.type === "call_started"}>
           <Show
             when={
@@ -265,5 +281,12 @@ const Base = styled("div", {
   base: {
     minHeight: "20px",
     alignItems: "center",
+  },
+});
+
+const ThreadLink = styled("a", {
+  base: {
+    fontWeight: 600,
+    color: "var(--md-sys-color-on-surface)",
   },
 });

@@ -74,11 +74,14 @@ export function ChannelHeader(props: Props) {
         <Match
           when={
             props.channel.type === "TextChannel" ||
+            props.channel.type === "ForumChannel" ||
             props.channel.type === "Group"
           }
         >
           <HeaderIcon>
-            <Symbol>grid_3x3</Symbol>
+            <Symbol>
+              {props.channel.type === "ForumChannel" ? "forum" : "grid_3x3"}
+            </Symbol>
           </HeaderIcon>
           <NonBreakingText
             class={
@@ -200,6 +203,26 @@ export function ChannelHeader(props: Props) {
         >
           <MdPersonAdd />
         </Button>
+      </Show>
+
+      <Show when={props.sidebarState && props.channel.type === "TextChannel"}>
+        <IconButton
+          use:floating={{
+            tooltip: {
+              placement: "bottom",
+              content: t`Threads`,
+            },
+          }}
+          onPress={() =>
+            props.setSidebarState!(
+              props.sidebarState!().state === "threads"
+                ? { state: "default" }
+                : { state: "threads" },
+            )
+          }
+        >
+          <Symbol>forum</Symbol>
+        </IconButton>
       </Show>
 
       <Show when={props.sidebarState}>

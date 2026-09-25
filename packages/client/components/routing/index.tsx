@@ -23,6 +23,8 @@ const RE_SERVER = /\/server\/([A-Z0-9]{26})/;
 const RE_CHANNEL = /\/channel\/([A-Z0-9]{26})/;
 const RE_MESSAGE_ID = /\/channel\/[A-Z0-9]{26}\/([A-Z0-9]{26})/;
 const RE_BOT_ID = /\/bot\/([A-Z0-9]{26})/;
+const RE_THREAD = /\/thread\/([A-Z0-9]{26})/;
+const RE_THREAD_MESSAGE_ID = /\/thread\/[A-Z0-9]{26}\/([A-Z0-9]{26})/;
 
 const RE_INVITE_EXACT = /^\/invite\/([\w\d]+)$/;
 const RE_BOT_ID_EXACT = /^\/bot\/[A-Z0-9]{26}$/;
@@ -30,6 +32,8 @@ const RE_BOT_ID_EXACT = /^\/bot\/[A-Z0-9]{26}$/;
 const RE_SERVER_EXACT = /^\/server\/([A-Z0-9]{26})$/;
 const RE_CHANNEL_EXACT =
   /^(?:\/server\/[A-Z0-9]{26})?\/channel\/([A-Z0-9]{26})(?:\/[A-Z0-9]{26})?$/;
+const RE_THREAD_EXACT =
+  /^\/server\/[A-Z0-9]{26}\/channel\/[A-Z0-9]{26}\/thread\/([A-Z0-9]{26})(?:\/[A-Z0-9]{26})?$/;
 const RE_MESSAGE_ID_EXACT =
   /^(?:\/server\/[A-Z0-9]{26})?\/channel\/[A-Z0-9]{26}\/([A-Z0-9]{26})$/;
 
@@ -73,6 +77,21 @@ type GlobalParams = {
   exactMessage: boolean;
 
   /**
+   * Thread ID (open in the side panel of its parent)
+   */
+  threadId?: string;
+
+  /**
+   * Exact match for thread (optionally with a message)?
+   */
+  exactThread?: boolean;
+
+  /**
+   * Message ID within the thread
+   */
+  threadMessageId?: string;
+
+  /**
    * Bot ID
    */
   botId?: string;
@@ -93,6 +112,7 @@ export function paramsFromPathname(pathname: string): GlobalParams {
     exactServer: !!pathname.match(RE_SERVER_EXACT),
     exactChannel: !!pathname.match(RE_CHANNEL_EXACT),
     exactMessage: !!pathname.match(RE_MESSAGE_ID_EXACT),
+    exactThread: !!pathname.match(RE_THREAD_EXACT),
     exactBot: !!pathname.match(RE_BOT_ID_EXACT),
   };
 
@@ -118,6 +138,18 @@ export function paramsFromPathname(pathname: string): GlobalParams {
   const message = pathname.match(RE_MESSAGE_ID);
   if (message) {
     params.messageId = message[1];
+  }
+
+  // Check for thread ID
+  const thread = pathname.match(RE_THREAD);
+  if (thread) {
+    params.threadId = thread[1];
+  }
+
+  // Check for message ID within thread
+  const threadMessage = pathname.match(RE_THREAD_MESSAGE_ID);
+  if (threadMessage) {
+    params.threadMessageId = threadMessage[1];
   }
 
   // Check for bot ID

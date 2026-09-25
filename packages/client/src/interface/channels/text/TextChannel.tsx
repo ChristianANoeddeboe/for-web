@@ -1,5 +1,7 @@
 import {
+  Accessor,
   Match,
+  Setter,
   Show,
   Switch,
   createEffect,
@@ -30,11 +32,13 @@ import { VoiceChannelCallCardMount } from "@revolt/ui/components/features/voice/
 
 import { ChannelHeader } from "../ChannelHeader";
 import { ChannelPageProps } from "../ChannelPage";
+import { ThreadHeader } from "../ThreadHeader";
 
 import { Channel } from "stoat.js";
 import { MessageComposition } from "./Composition";
 import { MemberSidebar } from "./MemberSidebar";
 import { TextSearchSidebar } from "./TextSearchSidebar";
+import { TextThreadsSidebar } from "./TextThreadsSidebar";
 
 /**
  * State of the channel sidebar
@@ -48,11 +52,14 @@ export type SidebarState =
       state: "pins";
     }
   | {
+      state: "threads";
+    }
+  | {
       state: "default";
     };
 
 export function canIHasSidebar(ch: Channel) {
-  return !["SavedMessages", "DirectMessage"].includes(ch.type);
+  return !["SavedMessages", "DirectMessage", "Thread"].includes(ch.type);
 }
 
 /**
@@ -71,9 +78,19 @@ const LARGE_SERVERS = [
 ];
 
 /**
+ * Thread panel state, when rendering a thread next to its parent
+ */
+export interface ThreadPanelProps {
+  expanded: Accessor<boolean>;
+  setExpanded: Setter<boolean>;
+}
+
+/**
  * Channel component
  */
-export function TextChannel(props: ChannelPageProps) {
+export function TextChannel(
+  props: ChannelPageProps & { threadPanel?: ThreadPanelProps },
+) {
   const state = useState();
   const client = useClient();
 
@@ -88,7 +105,17 @@ export function TextChannel(props: ChannelPageProps) {
    * Message id to be highlighted
    * @returns Message Id
    */
-  const highlightMessageId = () => params().messageId;
+  const highlightMessageId = () =>
+    props.channel.isThread ? params().threadMessageId : params().messageId;
+
+  /**
+   * Navigate to a message in this channel, or to the channel itself
+   * @param messageId Message Id
+   */
+  const navigateTo = (messageId?: string) =>
+    props.channel.isThread
+      ? navigate(props.channel.path + (messageId ? `/${messageId}` : ""))
+      : navigate(messageId ?? ".");
 
   const canConnect = () =>
     props.channel.isVoice && props.channel.havePermission("Connect");
@@ -192,11 +219,22 @@ export function TextChannel(props: ChannelPageProps) {
   return (
     <>
       <Header placement="primary">
-        <ChannelHeader
-          channel={props.channel}
-          sidebarState={sidebarState}
-          setSidebarState={setSidebarState}
-        />
+        <Show
+          when={props.threadPanel}
+          fallback={
+            <ChannelHeader
+              channel={props.channel}
+              sidebarState={sidebarState}
+              setSidebarState={setSidebarState}
+            />
+          }
+        >
+          <ThreadHeader
+            channel={props.channel}
+            expanded={props.threadPanel!.expanded}
+            setExpanded={props.threadPanel!.setExpanded}
+          />
+        </Show>
       </Header>
       <Content>
         <main class={main()}>
@@ -207,7 +245,7 @@ export function TextChannel(props: ChannelPageProps) {
                 <div>
                   <NewMessages
                     lastId={lastId}
-                    jumpBack={() => navigate(lastId()!)}
+                    jumpBack={() => navigateTo(lastId()!)}
                     dismiss={() => setLastId()}
                   />
                 </div>
@@ -234,7 +272,7 @@ export function TextChannel(props: ChannelPageProps) {
               />
             }
             highlightedMessageId={highlightMessageId}
-            clearHighlightedMessage={() => navigate(".")}
+            clearHighlightedMessage={() => navigateTo()}
             jumpToBottomRef={(ref) => (jumpToBottomRef = ref)}
             atEnd={[atEnd, setEnd]}
           />
@@ -300,6 +338,16 @@ export function TextChannel(props: ChannelPageProps) {
                     channel={props.channel}
                     query={{ pinned: true, sort: "Latest" }}
                   />
+                </WideSidebarContainer>
+              </Match>
+              <Match when={sidebarState().state === "threads"}>
+                <WideSidebarContainer>
+                  <SidebarTitle>
+                    <Text class="label" size="large">
+                      Threads
+                    </Text>
+                  </SidebarTitle>
+                  <TextThreadsSidebar channel={props.channel} />
                 </WideSidebarContainer>
               </Match>
             </Switch>

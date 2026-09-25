@@ -102,7 +102,37 @@ export function RenderAnchor(
       const client = useClient();
       const params = paramsFromPathname(url.pathname);
 
-      if (params.exactChannel) {
+      if (params.exactThread) {
+        const thread = () => client().channels.get(params.threadId!);
+
+        return (
+          <Switch
+            fallback={
+              <span class={internalLink()}>
+                <Symbol>forum</Symbol>
+                <Trans>Private Thread</Trans>
+              </span>
+            }
+          >
+            <Match when={thread()}>
+              <LinkComponent
+                class={internalLink()}
+                disabled={localProps.disabled}
+                href={new URL(url.pathname, location.origin).toString()}
+              >
+                <Symbol>forum</Symbol>
+                {thread()!.name}
+                {params.threadMessageId && (
+                  <>
+                    <MdChevronRight {...iconSize("1em")} />
+                    <MdChat {...iconSize("1em")} />
+                  </>
+                )}
+              </LinkComponent>
+            </Match>
+          </Switch>
+        );
+      } else if (params.exactChannel) {
         const channel = () => client().channels.get(params.channelId!);
 
         const internalUrl = () =>

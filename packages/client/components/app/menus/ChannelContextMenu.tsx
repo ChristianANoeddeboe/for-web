@@ -21,12 +21,16 @@ import {
   ContextMenuButton,
   ContextMenuDivider,
 } from "./ContextMenu";
+import { ThreadContextMenu } from "./ThreadContextMenu";
 import { NotificationContextMenu } from "./shared/NotificationContextMenu";
 
 /**
  * Context menu for channels
  */
 export function ChannelContextMenu(props: { channel: Channel }) {
+  if (props.channel.isThread)
+    return <ThreadContextMenu channel={props.channel} />;
+
   const state = useState();
   const { openModal } = useModals();
 

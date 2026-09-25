@@ -46,6 +46,7 @@ import {
 } from "../../../menus/UserContextMenu";
 
 import { EditMessage } from "./EditMessage";
+import { ThreadChip } from "./ThreadChip";
 
 /**
  * Regex for matching URLs
@@ -382,6 +383,14 @@ export function Message(props: Props) {
           addReaction={react}
           removeReaction={unreact}
         />
+        <Show
+          when={
+            props.message.hasThread &&
+            props.message.channel?.type === "TextChannel"
+          }
+        >
+          <ThreadChip message={props.message} />
+        </Show>
       </MessageContainer>
     </MessageContext>
   );

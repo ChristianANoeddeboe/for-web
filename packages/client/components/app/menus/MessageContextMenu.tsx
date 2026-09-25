@@ -6,6 +6,7 @@ import { File, Message } from "stoat.js";
 import { useClient, useUser } from "@revolt/client";
 import { CustomEmoji, UnicodeEmoji } from "@revolt/markdown/emoji";
 import { useModals } from "@revolt/modal";
+import { useNavigate } from "@revolt/routing";
 import { useState } from "@revolt/state";
 import { MediaPickerProps } from "@revolt/ui/components/features/messaging/composition/picker/CompositionMediaPicker";
 
@@ -16,6 +17,7 @@ import MdDeleteSweep from "@material-design-icons/svg/outlined/delete_sweep.svg?
 import MdDownload from "@material-design-icons/svg/outlined/download.svg?component-solid";
 import MdEdit from "@material-design-icons/svg/outlined/edit.svg?component-solid";
 import MdEmojiEmotions from "@material-design-icons/svg/outlined/emoji_emotions.svg?component-solid";
+import MdForum from "@material-design-icons/svg/outlined/forum.svg?component-solid";
 import MdLink from "@material-design-icons/svg/outlined/link.svg?component-solid";
 import MdMarkChatUnread from "@material-design-icons/svg/outlined/mark_chat_unread.svg?component-solid";
 import MdOpenInNew from "@material-design-icons/svg/outlined/open_in_new.svg?component-solid";
@@ -47,6 +49,7 @@ export function MessageContextMenu(props: {
   const state = useState();
   const client = useClient();
   const { openModal, showError } = useModals();
+  const navigate = useNavigate();
 
   /**
    * Reply to this message
@@ -190,6 +193,35 @@ export function MessageContextMenu(props: {
         <Show when={props.message!.channel?.havePermission("SendMessage")}>
           <ContextMenuButton icon={MdReply} onClick={reply}>
             <Trans>Reply</Trans>
+          </ContextMenuButton>
+        </Show>
+        <Show
+          when={
+            props.message!.channel?.type === "TextChannel" &&
+            !props.message!.hasThread &&
+            !props.message!.systemMessage &&
+            props.message!.channel?.havePermission("CreatePublicThreads")
+          }
+        >
+          <ContextMenuButton
+            icon={MdForum}
+            onClick={() =>
+              openModal({
+                type: "create_thread",
+                channel: props.message!.channel!,
+                message: props.message!,
+              })
+            }
+          >
+            <Trans>Create thread</Trans>
+          </ContextMenuButton>
+        </Show>
+        <Show when={props.message!.thread}>
+          <ContextMenuButton
+            icon={MdForum}
+            onClick={() => navigate(props.message!.thread!.path)}
+          >
+            <Trans>Open thread</Trans>
           </ContextMenuButton>
         </Show>
         <ContextMenuButton icon={MdMarkChatUnread} onClick={markAsUnread}>
