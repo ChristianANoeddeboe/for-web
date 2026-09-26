@@ -3,9 +3,11 @@ import { Show } from "solid-js";
 import { Trans } from "@lingui-solid/solid/macro";
 import { Server } from "stoat.js";
 
+import { setReorderingServer, useDevice } from "@revolt/common";
 import { useModals } from "@revolt/modal";
 
 import MdLibraryAdd from "@material-design-icons/svg/outlined/library_add.svg?component-solid";
+import MdReorder from "@material-design-icons/svg/outlined/reorder.svg?component-solid";
 
 import { ContextMenu, ContextMenuButton } from "./ContextMenu";
 
@@ -14,6 +16,7 @@ import { ContextMenu, ContextMenuButton } from "./ContextMenu";
  */
 export function ServerSidebarContextMenu(props: { server: Server }) {
   const { openModal } = useModals();
+  const { isMobile } = useDevice();
 
   /**
    * Create a new channel
@@ -44,6 +47,14 @@ export function ServerSidebarContextMenu(props: { server: Server }) {
         <ContextMenuButton icon={MdLibraryAdd} onClick={createCategory}>
           <Trans>Create category</Trans>
         </ContextMenuButton>
+        <Show when={isMobile}>
+          <ContextMenuButton
+            icon={MdReorder}
+            onClick={() => setReorderingServer(props.server.id)}
+          >
+            <Trans>Reorder channels</Trans>
+          </ContextMenuButton>
+        </Show>
       </Show>
     </ContextMenu>
   );

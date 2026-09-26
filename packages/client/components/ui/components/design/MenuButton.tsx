@@ -42,6 +42,11 @@ export type Props = {
    */
   readonly actions?: JSX.Element;
 
+  /**
+   * Always show actions instead of the alert indicator (e.g. touch reorder mode)
+   */
+  readonly actionsVisible?: boolean;
+
   readonly noDrawer?: boolean;
 };
 
@@ -63,6 +68,7 @@ export function MenuButton(
     "children",
     "alert",
     "actions",
+    "actionsVisible",
   ]);
   let ripple: MdRipple | undefined;
 
@@ -84,7 +90,7 @@ export function MenuButton(
       <Ripple ref={ripple} />
       {local.icon}
       <Content>{local.children}</Content>
-      <Show when={local.alert}>
+      <Show when={local.alert && !local.actionsVisible}>
         <span class="hover-hide">
           <Unreads
             count={typeof local.alert === "number" ? local.alert : 0}
@@ -94,7 +100,10 @@ export function MenuButton(
         </span>
       </Show>
       {local.actions && (
-        <Actions class="hover-show" onClick={(e) => e.stopPropagation()}>
+        <Actions
+          class={local.actionsVisible ? undefined : "hover-show"}
+          onClick={(e) => e.stopPropagation()}
+        >
           {local.actions}
         </Actions>
       )}

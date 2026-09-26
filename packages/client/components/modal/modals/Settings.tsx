@@ -1,12 +1,23 @@
-import { createEffect, createSignal, on, onCleanup, Show } from "solid-js";
+import {
+  createEffect,
+  createSignal,
+  on,
+  onCleanup,
+  onMount,
+  Show,
+} from "solid-js";
 import { Portal } from "solid-js/web";
 import { Motion, Presence } from "solid-motionone";
 import { css } from "styled-system/css";
 
 import { Settings, SettingsConfigurations } from "@revolt/app";
+import { useDevice } from "@revolt/common";
 import { useState } from "@revolt/state";
 import { DialogProps } from "@revolt/ui";
-import { SlideDrawer } from "@revolt/ui/components/navigation/SlideDrawer";
+import {
+  SlideDrawer,
+  SlideState,
+} from "@revolt/ui/components/navigation/SlideDrawer";
 
 import { Modals } from "../types";
 
@@ -26,11 +37,54 @@ export function SettingsModal(
   createEffect(
     on(contRef, (cont) => {
       if (!cont || sDrawer) return;
-      sDrawer = new SlideDrawer(cont, rootRef!);
+      // On phones, open on the section list unless a page was requested
+      sDrawer = new SlideDrawer(
+        cont,
+        rootRef!,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        !!(props.context as any)?.page,
+      );
       setDiagDrawer(sDrawer);
     }),
   );
+
+  // Hardware / browser back: page -> section list -> close
+  const { layout } = useDevice();
+  let historyEntry: string | undefined;
+  const pushHistoryEntry = () => {
+    history.pushState({ ...(history.state ?? {}), settings: true }, "");
+    historyEntry = location.href;
+  };
+  const onPopState = () => {
+    historyEntry = undefined;
+    if (sDrawer?.enabled && sDrawer.state === SlideState.SHOWN) {
+      sDrawer.setShown(false);
+      pushHistoryEntry();
+    } else {
+      props.onClose();
+    }
+  };
+  const dropHistoryEntry = () => {
+    window.removeEventListener("popstate", onPopState);
+    // Only unwind our own entry, not a navigation that happened meanwhile
+    if (historyEntry && historyEntry === location.href) history.back();
+    historyEntry = undefined;
+  };
+  onMount(() => {
+    if (layout() === "desktop") return;
+    pushHistoryEntry();
+    window.addEventListener("popstate", onPopState);
+  });
+  createEffect(
+    on(
+      () => props.show,
+      (show) => !show && dropHistoryEntry(),
+      { defer: true },
+    ),
+  );
+
   onCleanup(() => {
+    dropHistoryEntry();
     sDrawer?.delete();
     setDiagDrawer((sDrawer = undefined));
   });

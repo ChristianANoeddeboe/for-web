@@ -25,6 +25,8 @@ export const SidebarBase = styled("div", {
 
     _phone: {
       flexGrow: 1,
+      flexShrink: 1,
+      minWidth: 0,
     },
   },
 });

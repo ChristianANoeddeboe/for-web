@@ -133,7 +133,7 @@ export function ServerRoleEditor(props: { context: Server; roleId: string }) {
                 }}
               />
               <Column gap="lg">
-                <Row justify wrap>
+                <Swatches>
                   <For
                     each={[
                       "#7B68EE",
@@ -159,9 +159,9 @@ export function ServerRoleEditor(props: { context: Server; roleId: string }) {
                       />
                     )}
                   </For>
-                </Row>
+                </Swatches>
 
-                <Row justify wrap>
+                <Swatches>
                   <For
                     each={[
                       "#594CAD",
@@ -187,7 +187,7 @@ export function ServerRoleEditor(props: { context: Server; roleId: string }) {
                       />
                     )}
                   </For>
-                </Row>
+                </Swatches>
               </Column>
             </Row>
           </Column>
@@ -256,5 +256,19 @@ export const Divider = styled("div", {
     height: "1px",
     margin: "var(--gap-sm) 0",
     background: "var(--md-sys-color-outline-variant)",
+  },
+});
+
+const Swatches = styled("div", {
+  base: {
+    display: "flex",
+    flexWrap: "wrap",
+    justifyContent: "space-between",
+    gap: "var(--gap-sm)",
+
+    _phone: {
+      display: "grid",
+      gridTemplateColumns: "repeat(4, auto)",
+    },
   },
 });

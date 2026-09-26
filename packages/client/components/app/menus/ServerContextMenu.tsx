@@ -5,6 +5,7 @@ import dayjs from "dayjs";
 import { Server } from "stoat.js";
 
 import { useClient } from "@revolt/client";
+import { setReorderingServer, useDevice } from "@revolt/common";
 import { useModals } from "@revolt/modal";
 import { useState } from "@revolt/state";
 import { Column, Text, Time } from "@revolt/ui";
@@ -17,6 +18,7 @@ import MdMarkChatRead from "@material-design-icons/svg/outlined/mark_chat_read.s
 import MdNotificationsActive from "@material-design-icons/svg/outlined/notifications_active.svg?component-solid";
 import MdNotificationsOff from "@material-design-icons/svg/outlined/notifications_off.svg?component-solid";
 import MdPersonAdd from "@material-design-icons/svg/outlined/person_add.svg?component-solid";
+import MdReorder from "@material-design-icons/svg/outlined/reorder.svg?component-solid";
 import MdReport from "@material-design-icons/svg/outlined/report.svg?component-solid";
 import MdSettings from "@material-design-icons/svg/outlined/settings.svg?component-solid";
 import MdShield from "@material-design-icons/svg/outlined/shield.svg?component-solid";
@@ -40,6 +42,7 @@ import {
 export function ServerContextMenu(props: { server: Server }) {
   const state = useState();
   const client = useClient();
+  const { isMobile } = useDevice();
   const { openModal } = useModals();
 
   /**
@@ -286,6 +289,14 @@ export function ServerContextMenu(props: { server: Server }) {
       <Show when={permissionServerSettings()}>
         <ContextMenuButton icon={MdSettings} onClick={openSettings}>
           <Trans>Open server settings</Trans>
+        </ContextMenuButton>
+      </Show>
+      <Show when={isMobile && props.server.havePermission("ManageChannel")}>
+        <ContextMenuButton
+          icon={MdReorder}
+          onClick={() => setReorderingServer(props.server.id)}
+        >
+          <Trans>Reorder channels</Trans>
         </ContextMenuButton>
       </Show>
       <Show

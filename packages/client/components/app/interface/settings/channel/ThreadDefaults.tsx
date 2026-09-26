@@ -67,7 +67,8 @@ export default function ThreadDefaults(props: ChannelSettingsProps) {
       changes.default_auto_archive_minutes = Number(c.autoArchive.value);
     }
 
-    if (c.threadSlowmode.isDirty) {
+    // thread slowmode default only exists on forum channels
+    if (isForum() && c.threadSlowmode.isDirty) {
       const value = Number(c.threadSlowmode.value);
       if (value) {
         changes.default_thread_slowmode = value;
@@ -113,12 +114,14 @@ export default function ThreadDefaults(props: ChannelSettingsProps) {
           <AutoArchiveOptions />
         </Form2.Select>
 
-        <Form2.Select
-          label={t`Slowmode`}
-          control={editGroup.controls.threadSlowmode}
-        >
-          <SlowmodeOptions />
-        </Form2.Select>
+        <Show when={isForum()}>
+          <Form2.Select
+            label={t`Slowmode`}
+            control={editGroup.controls.threadSlowmode}
+          >
+            <SlowmodeOptions />
+          </Form2.Select>
+        </Show>
 
         <Show when={isForum()}>
           <Form2.Checkbox control={editGroup.controls.requireTag}>

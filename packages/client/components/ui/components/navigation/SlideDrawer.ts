@@ -52,7 +52,9 @@ export class SlideDrawer {
   constructor(
     private drawer: HTMLElement,
     private root: HTMLElement,
+    initiallyShown = true,
   ) {
+    this.lShow = initiallyShown;
     this.start = this.start.bind(this);
     this.move = this.move.bind(this);
     root.addEventListener("touchstart", this.start);

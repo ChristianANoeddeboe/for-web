@@ -5,7 +5,10 @@ import { styled } from "styled-system/jsx";
 
 import { Breadcrumbs, IconButton, Text } from "@revolt/ui";
 
+import MdArrowBack from "@material-design-icons/svg/outlined/arrow_back.svg?component-solid";
 import MdClose from "@material-design-icons/svg/outlined/close.svg?component-solid";
+
+import { useState } from "@revolt/state";
 
 import { SettingsList } from "..";
 import { useSettingsNavigation } from "../Settings";
@@ -22,23 +25,34 @@ export function SettingsContent(props: {
   ref: Setter<HTMLDivElement | undefined>;
 }) {
   const { navigate } = useSettingsNavigation();
+  const { diagDrawer } = useState();
 
   return (
     <div ref={props.ref} use:scrollable={{ class: base }}>
       <Show when={props.page()}>
         <InnerContent class="settings_cont">
           <InnerColumn>
-            <Show when={props.page() !== "account"}>
-              <Text class="title" size="large">
-                <Breadcrumbs
-                  elements={props.page()!.split("/")}
-                  renderElement={(key) =>
-                    props.title(props.list() as SettingsList<never>, key)
-                  }
-                  navigate={(keys) => navigate(keys.join("/"))}
-                />
-              </Text>
-            </Show>
+            <TitleRow>
+              <PhoneBack>
+                <IconButton
+                  variant="standard"
+                  onPress={() => diagDrawer()?.setShown(false)}
+                >
+                  <MdArrowBack />
+                </IconButton>
+              </PhoneBack>
+              <Show when={props.page() !== "account"}>
+                <Text class="title" size="large">
+                  <Breadcrumbs
+                    elements={props.page()!.split("/")}
+                    renderElement={(key) =>
+                      props.title(props.list() as SettingsList<never>, key)
+                    }
+                    navigate={(keys) => navigate(keys.join("/"))}
+                  />
+                </Text>
+              </Show>
+            </TitleRow>
             {props.children}
             <div class={css({ minHeight: "80px" })} />
           </InnerColumn>
@@ -105,6 +119,33 @@ const InnerColumn = styled("div", {
     display: "flex",
     flexDirection: "column",
     marginBlockEnd: "80px",
+  },
+});
+
+/**
+ * Page title with the phone back button
+ */
+const TitleRow = styled("div", {
+  base: {
+    display: "flex",
+    alignItems: "center",
+    gap: "var(--gap-sm)",
+    minWidth: 0,
+
+    "& .title": { minWidth: 0 },
+  },
+});
+
+/**
+ * Back to the section list, only on phones where the list is a drawer
+ */
+const PhoneBack = styled("div", {
+  base: {
+    display: "none",
+    flexShrink: 0,
+    marginInlineStart: "-8px",
+
+    _phone: { display: "flex" },
   },
 });
 

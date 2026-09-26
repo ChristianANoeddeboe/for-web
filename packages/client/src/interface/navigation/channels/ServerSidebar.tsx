@@ -7,14 +7,19 @@ import {
   Setter,
   Show,
   Switch,
+  createEffect,
   createMemo,
 } from "solid-js";
 
-import { useLingui } from "@lingui-solid/solid/macro";
+import { Trans, useLingui } from "@lingui-solid/solid/macro";
 import type { API, Channel, Server, ServerFlags } from "stoat.js";
 import { styled } from "styled-system/jsx";
 
-import { useDevice } from "@revolt/common";
+import {
+  reorderingServer,
+  setReorderingServer,
+  useDevice,
+} from "@revolt/common";
 import { KeybindAction, createKeybind } from "@revolt/keybinds";
 import { TextWithEmoji } from "@revolt/markdown";
 import { useModals } from "@revolt/modal";
@@ -22,6 +27,7 @@ import { useNavigate, useSmartParams } from "@revolt/routing";
 import { useVoice } from "@revolt/rtc";
 import { useState } from "@revolt/state";
 import {
+  Button,
   Column,
   Draggable,
   Header,
@@ -93,6 +99,15 @@ type OrderingEvent =
 export const ServerSidebar = (props: Props) => {
   const navigate = useNavigate();
   const { isMobile } = useDevice();
+
+  /**
+   * Touch reorder mode for this server (mobile only)
+   */
+  const reordering = () => reorderingServer() === props.server.id;
+  createEffect(() => {
+    if (reorderingServer() && reorderingServer() !== props.server.id)
+      setReorderingServer();
+  });
 
   // Users can manage certain parts of the server individually, regardless of their ManageServer Permission
   const canManageServer = () =>
@@ -225,6 +240,20 @@ export const ServerSidebar = (props: Props) => {
           </Header>
         </Match>
       </Switch>
+      <Show when={reordering()}>
+        <ReorderBar>
+          <span>
+            <Trans>Drag the handles to reorder channels and categories</Trans>
+          </span>
+          <Button
+            size="sm"
+            variant="filled"
+            onPress={() => setReorderingServer()}
+          >
+            <Trans>Done</Trans>
+          </Button>
+        </ReorderBar>
+      </Show>
       <div
         use:invisibleScrollable
         style={{ "flex-grow": 1, "margin-bottom": "var(--gap-md)" }}
@@ -233,9 +262,8 @@ export const ServerSidebar = (props: Props) => {
         <Draggable
           dragHandles
           type="category"
-          //TODO - No channel ordering on mobile due to usability issue
-          //Consider adding a way to enable reordering with dragHandles in server settings
-          disabled={isMobile || noOrdering()}
+          // Touch drag fights with scrolling, so mobile needs reorder mode
+          disabled={(isMobile && !reordering()) || noOrdering()}
           items={props.server.orderedChannels}
           onChange={(ids) => handleOrdering({ type: "categories", ids })}
         >
@@ -249,6 +277,7 @@ export const ServerSidebar = (props: Props) => {
               setDragDisabled={entry.setDragDisabled}
               noOrdering={noOrdering}
               handleOrdering={handleOrdering}
+              reordering={reordering}
             />
           )}
         </Draggable>
@@ -331,6 +360,7 @@ function Category(
     channelId: string | undefined;
     noOrdering: Accessor<boolean>;
     handleOrdering: (event: OrderingEvent) => void;
+    reordering: Accessor<boolean>;
   } & Pick<Props, "menuGenerator"> & {
       dragDisabled: Accessor<boolean>;
       setDragDisabled: Setter<boolean>;
@@ -361,6 +391,9 @@ function Category(
             }}
             {...createDragHandle(props.dragDisabled, props.setDragDisabled)}
           >
+            <Show when={isMobile && props.reordering()}>
+              <Symbol size={16}>drag_indicator</Symbol>
+            </Show>
             {props.category.title}
             <MdChevronRight {...iconSize(12)} />
           </CategoryBase>
@@ -378,9 +411,11 @@ function Category(
             moved: channelIds.length !== current.length,
           });
         }}
-        //TODO - No channel ordering on mobile due to usability issue
-        //Consider adding a way to enable reordering with dragHandles in server settings
-        disabled={isMobile || props.noOrdering() || !isOpen()}
+        // Touch drag fights with scrolling, so mobile needs reorder mode
+        disabled={
+          (isMobile && !props.reordering()) || props.noOrdering() || !isOpen()
+        }
+        dragHandles={isMobile}
         minimumDropAreaHeight="32px"
       >
         {(entry) => (
@@ -388,6 +423,11 @@ function Category(
             channel={entry.item}
             active={entry.item.id === props.channelId}
             menuGenerator={props.menuGenerator}
+            dragHandle={
+              isMobile && props.reordering()
+                ? createDragHandle(entry.dragDisabled, entry.setDragDisabled)
+                : undefined
+            }
           />
         )}
       </Draggable>
@@ -453,7 +493,11 @@ const CategoryBase = styled("div", {
  * Server channel entry
  */
 function Entry(
-  props: { channel: Channel; active: boolean } & Pick<Props, "menuGenerator">,
+  props: {
+    channel: Channel;
+    active: boolean;
+    dragHandle?: ReturnType<typeof createDragHandle>;
+  } & Pick<Props, "menuGenerator">,
 ) {
   const state = useState();
   const voice = useVoice();
@@ -509,6 +553,7 @@ function Entry(
   return (
     <Column gap="sm">
       <MenuButton
+        actionsVisible={!!props.dragHandle}
         href={`/server/${props.channel.serverId}/channel/${props.channel.id}`}
         use:floating={props.menuGenerator(props.channel)}
         size="normal"
@@ -537,7 +582,16 @@ function Entry(
           </>
         }
         actions={
-          <Show when={!isMobile}>
+          <Show
+            when={!isMobile}
+            fallback={
+              <Show when={props.dragHandle}>
+                <DragHandle {...props.dragHandle}>
+                  <Symbol>drag_indicator</Symbol>
+                </DragHandle>
+              </Show>
+            }
+          >
             <Show when={canInvite()}>
               <a
                 use:floating={{
@@ -625,6 +679,40 @@ function Entry(
 /**
  * Nested list of threads under a channel
  */
+/**
+ * Banner shown while reordering on touch devices
+ */
+const ReorderBar = styled("div", {
+  base: {
+    display: "flex",
+    alignItems: "center",
+    gap: "var(--gap-md)",
+    margin: "var(--gap-md)",
+    padding: "var(--gap-md) var(--gap-lg)",
+    borderRadius: "var(--borderRadius-lg)",
+    background: "var(--md-sys-color-secondary-container)",
+    color: "var(--md-sys-color-on-secondary-container)",
+    fontSize: "0.875rem",
+    minWidth: 0,
+    whiteSpace: "normal",
+
+    "& span": { flex: "1 1 0", minWidth: 0 },
+    "& button": { flexShrink: 0 },
+  },
+});
+
+/**
+ * Touch drag handle on a channel entry
+ */
+const DragHandle = styled("span", {
+  base: {
+    display: "flex",
+    touchAction: "none",
+    padding: "4px",
+    color: "var(--md-sys-color-on-surface-variant)",
+  },
+});
+
 const Threads = styled("div", {
   base: {
     display: "flex",
