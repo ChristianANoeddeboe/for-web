@@ -179,9 +179,9 @@ export function MessageComposition(props: Props) {
   const [nodeReplacement, setNodeReplacement] =
     createSignal<readonly [string | "_focus"]>();
 
-  // bind this composition instance to the global node replacement signal
-  state.draft._setNodeReplacement = setNodeReplacement;
-  onCleanup(() => (state.draft._setNodeReplacement = undefined));
+  // bind this composition instance to the per-channel node replacement signal
+  state.draft._setNodeReplacement.set(props.channel.id, setNodeReplacement);
+  onCleanup(() => state.draft._setNodeReplacement.delete(props.channel.id));
 
   createEffect(
     on(

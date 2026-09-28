@@ -112,7 +112,17 @@ export class Draft extends AbstractStore<"draft", TypeDraft> {
    */
   private textSelection?: TextSelection;
 
-  _setNodeReplacement?: Setter<readonly [string | "_focus"] | undefined>;
+  /**
+   * Node replacement / focus targets, keyed by channel id.
+   *
+   * Linked to a Composition instance per channel; because text channels and their thread panels
+   * can be mounted side by side (each with its own message box), a single shared slot is not enough
+   * to route a focus request to the correct composer.
+   */
+  _setNodeReplacement = new Map<
+    string,
+    Setter<readonly [string | "_focus"] | undefined>
+  >();
 
   /**
    * Construct store
@@ -517,12 +527,35 @@ export class Draft extends AbstractStore<"draft", TypeDraft> {
   }
 
   /**
+   * Route a node replacement / focus request to the composer for a channel.
+   *
+   * In the split thread layout several composers are mounted at once, so requests must target the
+   * right one. Falls back to the most recently registered composer when the channel is unknown or
+   * has no mounted composer (e.g. a menu overlay not tied to a specific channel).
+   * @param channelId Channel whose composer should receive the value
+   * @param value Node replacement value or "_focus" to just focus
+   */
+  setNodeReplacement(
+    channelId: string | undefined,
+    value: readonly [string | "_focus"] | undefined,
+  ) {
+    if (channelId && this._setNodeReplacement.has(channelId)) {
+      this._setNodeReplacement.get(channelId)!(value);
+    } else {
+      const values = [...this._setNodeReplacement.values()];
+      values[values.length - 1]?.(value);
+    }
+  }
+
+  /**
    * Add a reply to the given message
    * @param message Message
    * @param selfId Own user ID
    */
   addReply(message: Message, selfId: string) {
-    this._setNodeReplacement?.(["_focus"]);
+    // Focus the composer for the message's own channel; in the split thread layout multiple
+    // composers are mounted at once, so route by channel rather than a single shared slot.
+    this.setNodeReplacement(message.channelId, ["_focus"]);
 
     // Ignore if reply already exists
     if (

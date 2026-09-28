@@ -34,7 +34,10 @@ export function EditMessage(props: { message: Message }) {
     const content = state.draft.editingMessageContent;
 
     if (content?.length) {
-      state.draft._setNodeReplacement?.(["_focus"]); // focus message box
+      state.draft.setNodeReplacement(
+        props.message.channelId,
+        ["_focus"],
+      ); // focus message box
       if (content === props.message.content) {
         return;
       }
@@ -53,7 +56,10 @@ export function EditMessage(props: { message: Message }) {
 
   createKeybind(KeybindAction.CHAT_CANCEL_EDITING, () => {
     state.draft.setEditingMessage(undefined);
-    state.draft._setNodeReplacement?.(["_focus"]); // focus message box
+    state.draft.setNodeReplacement(
+      props.message.channelId,
+      ["_focus"],
+    ); // focus message box
   });
 
   const searchSpace = useSearchSpace(() => props.message, client);
