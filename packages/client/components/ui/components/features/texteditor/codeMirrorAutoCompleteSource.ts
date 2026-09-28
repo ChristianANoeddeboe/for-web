@@ -18,6 +18,7 @@ import emojiMapping from "../../../emojiMapping.json";
 import { AutoCompleteSearchSpace } from "../../utils/autoComplete";
 
 import { isInCodeBlock } from "./codeMirrorCommon";
+import { SLASH_COMMANDS } from "./codeMirrorSlashCommands";
 
 const EMOJI_KEYS = Object.keys(emojiMapping).sort();
 const MAPPED_EMOJI_KEYS = EMOJI_KEYS.map(
@@ -29,11 +30,12 @@ const MAPPED_EMOJI_KEYS = EMOJI_KEYS.map(
     }) as Completion,
 );
 
-const RE_match = /(?<!\w)[:@%#]\w*/;
+const RE_match = /(?<!\w)[:@%#/]\w*/;
 const RE_emojiValidFor = /(?<!\w):\w*/;
 const RE_mentionValidFor = /(?<!\w)@\w*/;
 const RE_roleValidFor = /(?<!\w)@\w*/;
 const RE_channelValidFor = /(?<!\w)#\w*/;
+const RE_commandValidFor = /(?<!\w)\/\w*/;
 
 export function codeMirrorAutoCompleteSource(
   searchSpace: Accessor<AutoCompleteSearchSpace>,
@@ -110,6 +112,18 @@ export function codeMirrorAutoCompleteSource(
     ),
   );
 
+  const slashCommands = createMemo(() =>
+    SLASH_COMMANDS.map(
+      (command) =>
+        ({
+          type: "command",
+          label: "/" + command.name,
+          detail: command.description,
+          apply: command.apply ?? "/" + command.name + " ",
+        }) as Completion,
+    ),
+  );
+
   // eslint-disable-next-line solid/reactivity
   return (context: CompletionContext) => {
     if (isInCodeBlock(context.state, context.pos, context.pos)) {
@@ -143,6 +157,12 @@ export function codeMirrorAutoCompleteSource(
           from: token.from,
           options: channels(),
           validFor: RE_channelValidFor,
+        } as CompletionResult;
+      case "/":
+        return {
+          from: token.from,
+          options: slashCommands(),
+          validFor: RE_commandValidFor,
         } as CompletionResult;
       default:
         return null;
