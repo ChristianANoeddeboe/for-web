@@ -1,11 +1,11 @@
-import { Accessor, createMemo } from "solid-js";
+import { Accessor, createMemo, createResource } from "solid-js";
 
 import type {
   Completion,
   CompletionContext,
   CompletionResult,
 } from "@codemirror/autocomplete";
-import { User } from "stoat.js";
+import { User, type Command } from "stoat.js";
 
 import { useClient } from "@revolt/client";
 import {
@@ -112,8 +112,22 @@ export function codeMirrorAutoCompleteSource(
     ),
   );
 
-  const slashCommands = createMemo(() =>
-    SLASH_COMMANDS.map(
+  const [serverCommands] = createResource(
+    () => searchSpace()?.server?.id,
+    async (serverId) => {
+      if (!serverId) return [] as Command[];
+      const server = client().servers.get(serverId);
+      if (!server) return [] as Command[];
+      try {
+        return await server.fetchServerCommands();
+      } catch {
+        return [] as Command[];
+      }
+    },
+  );
+
+  const slashCommands = createMemo(() => {
+    const builtins = SLASH_COMMANDS.map(
       (command) =>
         ({
           type: "command",
@@ -121,8 +135,20 @@ export function codeMirrorAutoCompleteSource(
           detail: command.description,
           apply: command.apply ?? "/" + command.name + " ",
         }) as Completion,
-    ),
-  );
+    );
+
+    const server = (serverCommands() ?? []).map(
+      (command) =>
+        ({
+          type: "command",
+          label: "/" + command.name,
+          detail: command.description ?? "",
+          apply: "/" + command.name + " ",
+        }) as Completion,
+    );
+
+    return builtins.concat(server);
+  });
 
   // eslint-disable-next-line solid/reactivity
   return (context: CompletionContext) => {

@@ -14,6 +14,7 @@ export interface AutoCompleteSearchSpace {
   members?: ServerMember[];
   channels?: Channel[];
   roles?: ServerRole[];
+  server?: Server;
 }
 
 function generateSearchSpaceFrom(
@@ -36,6 +37,7 @@ function generateSearchSpaceFrom(
       ),
       channels: object.channels,
       roles: [...object.roles.values()],
+      server: object,
     };
   }
 
