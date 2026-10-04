@@ -194,6 +194,35 @@ export function TextChannel(
     state: "default",
   });
 
+  // Live drag width (px) while resizing; null when not dragging
+  const [dragWidth, setDragWidth] = createSignal<number | null>(null);
+
+  // Effective sidebar width while the active sidebar is open
+  const sidebarWidth = () =>
+    dragWidth() ?? state.layout.getChannelSidebarWidth();
+
+  const startSidebarDrag = (e: MouseEvent) => {
+    e.preventDefault();
+    const onMove = (ev: MouseEvent) => {
+      setDragWidth(
+        Math.max(280, Math.min(720, window.innerWidth - ev.clientX)),
+      );
+    };
+    const onUp = () => {
+      window.removeEventListener("mousemove", onMove);
+      window.removeEventListener("mouseup", onUp);
+      document.body.classList.remove("resizing");
+      const w = dragWidth();
+      if (w !== null) {
+        state.layout.setChannelSidebarWidth(w);
+        setDragWidth(null);
+      }
+    };
+    document.body.classList.add("resizing");
+    window.addEventListener("mousemove", onMove);
+    window.addEventListener("mouseup", onUp);
+  };
+
   // todo: in the future maybe persist per ID?
   createEffect(
     on(
@@ -300,9 +329,16 @@ export function TextChannel(
               class: sidebar(),
             }}
             style={{
-              width: sidebarState().state !== "default" ? "360px" : "",
+              width:
+                sidebarState().state !== "default"
+                  ? `${sidebarWidth()}px`
+                  : "",
             }}
           >
+            <div
+              class="sidebar-drag-handle"
+              onmousedown={startSidebarDrag}
+            />
             <Switch
               fallback={
                 <MemberSidebar
@@ -384,6 +420,7 @@ const Content = styled("div", {
 const sidebar = cva({
   base: {
     flexShrink: 0,
+    position: "relative",
     width: "var(--layout-width-channel-sidebar)",
     // margin: "var(--gap-md)",
     borderRadius: "var(--borderRadius-lg)",
@@ -398,7 +435,7 @@ const sidebar = cva({
 const WideSidebarContainer = styled("div", {
   base: {
     paddingRight: "var(--gap-md)",
-    width: "360px",
+    width: "100%",
   },
 });
 

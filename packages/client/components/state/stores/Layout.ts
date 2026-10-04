@@ -41,6 +41,12 @@ export interface TypeLayout {
    * Only the contrary is ever stored
    */
   openSections: Record<string, boolean>;
+
+  /**
+   * Width (px) of the right-hand channel sidebar (threads / search / member),
+   * persisted so the user can resize it and it sticks.
+   */
+  channelSidebarWidth?: number;
 }
 
 /**
@@ -104,6 +110,14 @@ export class Layout extends AbstractStore<"layout", TypeLayout> {
           layout.openSections[section] = input.openSections[section];
         }
       }
+    }
+
+    if (
+      typeof input.channelSidebarWidth === "number" &&
+      Number.isFinite(input.channelSidebarWidth) &&
+      input.channelSidebarWidth > 0
+    ) {
+      layout.channelSidebarWidth = Math.round(input.channelSidebarWidth);
     }
 
     return layout;
@@ -193,5 +207,21 @@ export class Layout extends AbstractStore<"layout", TypeLayout> {
       !this.getSectionState(id, defaultValue),
       defaultValue,
     );
+  }
+
+  /**
+   * Get the persisted width (px) of the right-hand channel sidebar
+   * @returns Width in px
+   */
+  getChannelSidebarWidth() {
+    return this.get().channelSidebarWidth ?? 360;
+  }
+
+  /**
+   * Set the persisted width (px) of the right-hand channel sidebar
+   * @param width Width in px
+   */
+  setChannelSidebarWidth(width: number) {
+    this.set("channelSidebarWidth", Math.max(280, Math.min(720, Math.round(width))));
   }
 }

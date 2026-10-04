@@ -137,3 +137,26 @@ body {
 .hljs-tag {
   /* purposely ignored */
 }
+
+/* Resizable channel sidebar (threads / search / pins) drag handle */
+.sidebar-drag-handle {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 6px;
+  cursor: col-resize;
+  z-index: 10;
+  transition: background-color 0.15s ease;
+}
+
+.sidebar-drag-handle:hover,
+body.resizing .sidebar-drag-handle {
+  background-color: var(--md-sys-color-primary, #5865f2);
+}
+
+body.resizing,
+body.resizing * {
+  cursor: col-resize !important;
+  user-select: none !important;
+}
