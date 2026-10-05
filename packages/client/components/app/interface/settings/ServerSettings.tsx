@@ -4,6 +4,7 @@ import {
   BiSolidGroup,
   BiSolidHappyBeaming,
   BiSolidInfoCircle,
+  BiSolidLayer,
   BiSolidTrash,
   BiSolidUserX,
 } from "solid-icons/bi";
@@ -18,6 +19,7 @@ import { ColouredText } from "@revolt/ui";
 
 import { SettingsConfiguration } from ".";
 import { ChannelPermissionsEditor } from "./channel/permissions/ChannelPermissionsEditor";
+import ChannelReorder from "./server/ChannelReorder";
 import Overview from "./server/Overview";
 import { ListServerBans } from "./server/bans/ListBans";
 import { EmojiList } from "./server/emojis/EmojiList";
@@ -71,6 +73,8 @@ const Config: SettingsConfiguration<Server> = {
     switch (id) {
       case "overview":
         return <Overview server={server} />;
+      case "channels":
+        return <ChannelReorder server={server} />;
       case "emojis":
         return <EmojiList server={server} />;
       case "roles":
@@ -105,6 +109,17 @@ const Config: SettingsConfiguration<Server> = {
               id: "overview",
               icon: <BiSolidInfoCircle size={20} />,
               title: <Trans>Overview</Trans>,
+            },
+          ],
+        },
+        {
+          hidden: !server.havePermission("ManageChannel"),
+          title: <Trans>Channels</Trans>,
+          entries: [
+            {
+              id: "channels",
+              icon: <BiSolidLayer size={20} />,
+              title: <Trans>Reorder</Trans>,
             },
           ],
         },
