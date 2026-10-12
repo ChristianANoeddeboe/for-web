@@ -1,4 +1,4 @@
-import { For, Show, createSignal } from "solid-js";
+import { Index, Show, createSignal } from "solid-js";
 
 import { Trans, useLingui } from "@lingui-solid/solid/macro";
 import type { ForumTag } from "stoat.js";
@@ -84,42 +84,42 @@ export default function ForumTags(props: ChannelSettingsProps) {
         </Trans>
       </Text>
 
-      <For each={tags()}>
+      <Index each={tags()}>
         {(tag, index) => (
           <TagRow>
-            <ForumTagChip tag={tag} />
+            <ForumTagChip tag={tag()} />
             <TextField
               variant="filled"
-              value={tag.emoji ?? ""}
+              value={tag().emoji ?? ""}
               placeholder={t`Emoji`}
-              onInput={(e) => update(index(), { emoji: e.currentTarget.value })}
+              onInput={(e) => update(index, { emoji: e.currentTarget.value })}
               style={{ width: "96px" }}
             />
             <TextField
               variant="filled"
-              value={tag.name}
+              value={tag().name}
               maxlength={20}
               placeholder={t`Tag name`}
-              onInput={(e) => update(index(), { name: e.currentTarget.value })}
+              onInput={(e) => update(index, { name: e.currentTarget.value })}
             />
             <Checkbox
-              checked={tag.moderated}
+              checked={tag().moderated}
               onChange={(e) =>
-                update(index(), { moderated: e.currentTarget.checked })
+                update(index, { moderated: e.currentTarget.checked })
               }
             >
               <Trans>Moderated</Trans>
             </Checkbox>
             <IconButton
               onPress={() =>
-                setTags((prev) => prev.filter((_, i) => i !== index()))
+                setTags((prev) => prev.filter((_, i) => i !== index))
               }
             >
               <Symbol>delete</Symbol>
             </IconButton>
           </TagRow>
         )}
-      </For>
+      </Index>
 
       <Row>
         <Button
