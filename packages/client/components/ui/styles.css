@@ -143,15 +143,19 @@ body {
   position: absolute;
   top: 0;
   bottom: 0;
-  left: 0;
-  width: 6px;
+  left: -3px;
+  width: 8px;
   cursor: col-resize;
+  touch-action: none;
   z-index: 10;
+  border-radius: 4px;
   transition: background-color 0.15s ease;
 }
 
 .sidebar-drag-handle:hover,
+.sidebar-drag-handle:focus-visible,
 body.resizing .sidebar-drag-handle {
+  outline: none;
   background-color: var(--md-sys-color-primary, #5865f2);
 }
 

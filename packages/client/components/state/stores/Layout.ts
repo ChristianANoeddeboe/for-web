@@ -5,6 +5,13 @@ import { State } from "..";
 import { AbstractStore } from ".";
 
 /**
+ * Bounds (px) for the resizable right-hand channel sidebar
+ */
+export const SIDEBAR_MIN_WIDTH = 280;
+export const SIDEBAR_MAX_WIDTH = 720;
+export const SIDEBAR_DEFAULT_WIDTH = 360;
+
+/**
  * Static section IDs
  */
 export enum LAYOUT_SECTIONS {
@@ -117,7 +124,10 @@ export class Layout extends AbstractStore<"layout", TypeLayout> {
       Number.isFinite(input.channelSidebarWidth) &&
       input.channelSidebarWidth > 0
     ) {
-      layout.channelSidebarWidth = Math.round(input.channelSidebarWidth);
+      layout.channelSidebarWidth = Math.max(
+        SIDEBAR_MIN_WIDTH,
+        Math.min(SIDEBAR_MAX_WIDTH, Math.round(input.channelSidebarWidth)),
+      );
     }
 
     return layout;
@@ -214,7 +224,7 @@ export class Layout extends AbstractStore<"layout", TypeLayout> {
    * @returns Width in px
    */
   getChannelSidebarWidth() {
-    return this.get().channelSidebarWidth ?? 360;
+    return this.get().channelSidebarWidth ?? SIDEBAR_DEFAULT_WIDTH;
   }
 
   /**
@@ -222,6 +232,12 @@ export class Layout extends AbstractStore<"layout", TypeLayout> {
    * @param width Width in px
    */
   setChannelSidebarWidth(width: number) {
-    this.set("channelSidebarWidth", Math.max(280, Math.min(720, Math.round(width))));
+    this.set(
+      "channelSidebarWidth",
+      Math.max(
+        SIDEBAR_MIN_WIDTH,
+        Math.min(SIDEBAR_MAX_WIDTH, Math.round(width)),
+      ),
+    );
   }
 }

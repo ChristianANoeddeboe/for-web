@@ -19,7 +19,12 @@ import { useClient } from "@revolt/client";
 import { Keybind, KeybindAction, createKeybind } from "@revolt/keybinds";
 import { useNavigate, useSmartParams } from "@revolt/routing";
 import { useState } from "@revolt/state";
-import { LAYOUT_SECTIONS } from "@revolt/state/stores/Layout";
+import {
+  LAYOUT_SECTIONS,
+  SIDEBAR_DEFAULT_WIDTH,
+  SIDEBAR_MAX_WIDTH,
+  SIDEBAR_MIN_WIDTH,
+} from "@revolt/state/stores/Layout";
 import {
   BelowFloatingHeader,
   Header,
@@ -39,6 +44,11 @@ import { MessageComposition } from "./Composition";
 import { MemberSidebar } from "./MemberSidebar";
 import { TextSearchSidebar } from "./TextSearchSidebar";
 import { TextThreadsSidebar } from "./TextThreadsSidebar";
+
+/**
+ * Minimum width (px) the message list keeps when the sidebar is resized
+ */
+const MIN_CHANNEL_WIDTH = 360;
 
 /**
  * State of the channel sidebar
@@ -197,30 +207,83 @@ export function TextChannel(
   // Live drag width (px) while resizing; null when not dragging
   const [dragWidth, setDragWidth] = createSignal<number | null>(null);
 
+  // Outer (non-scrolling) sidebar element, used to measure its right edge
+  let sidebarOuterElement: HTMLDivElement | undefined;
+
+  /**
+   * Clamp a sidebar width to the allowed range, leaving room for the
+   * message list so the sidebar can never squeeze the channel out of view.
+   */
+  const clampSidebarWidth = (width: number) => {
+    const row = sidebarOuterElement?.parentElement;
+    const available = row
+      ? row.getBoundingClientRect().width - MIN_CHANNEL_WIDTH
+      : SIDEBAR_MAX_WIDTH;
+    const max = Math.max(
+      SIDEBAR_MIN_WIDTH,
+      Math.min(SIDEBAR_MAX_WIDTH, available),
+    );
+    return Math.round(Math.max(SIDEBAR_MIN_WIDTH, Math.min(max, width)));
+  };
+
   // Effective sidebar width while the active sidebar is open
   const sidebarWidth = () =>
     dragWidth() ?? state.layout.getChannelSidebarWidth();
 
-  const startSidebarDrag = (e: MouseEvent) => {
+  // Teardown for an in-progress drag (if any)
+  let stopSidebarDrag: (() => void) | undefined;
+  onCleanup(() => stopSidebarDrag?.());
+
+  /**
+   * Begin resizing the sidebar from the drag handle (mouse, pen or touch)
+   */
+  const startSidebarDrag = (e: PointerEvent) => {
+    if (e.button !== 0 || !sidebarOuterElement) return;
     e.preventDefault();
-    const onMove = (ev: MouseEvent) => {
-      setDragWidth(
-        Math.max(280, Math.min(720, window.innerWidth - ev.clientX)),
-      );
-    };
-    const onUp = () => {
-      window.removeEventListener("mousemove", onMove);
-      window.removeEventListener("mouseup", onUp);
+
+    const handle = e.currentTarget as HTMLElement;
+    handle.setPointerCapture?.(e.pointerId);
+
+    // Anchor on the sidebar's right edge so gaps/padding don't skew the width
+    const rightEdge = sidebarOuterElement.getBoundingClientRect().right;
+
+    const onMove = (ev: PointerEvent) =>
+      setDragWidth(clampSidebarWidth(rightEdge - ev.clientX));
+
+    const finish = () => {
+      handle.removeEventListener("pointermove", onMove);
+      handle.removeEventListener("pointerup", finish);
+      handle.removeEventListener("pointercancel", finish);
       document.body.classList.remove("resizing");
+      stopSidebarDrag = undefined;
+
       const w = dragWidth();
       if (w !== null) {
         state.layout.setChannelSidebarWidth(w);
         setDragWidth(null);
       }
     };
+
+    stopSidebarDrag = finish;
     document.body.classList.add("resizing");
-    window.addEventListener("mousemove", onMove);
-    window.addEventListener("mouseup", onUp);
+    handle.addEventListener("pointermove", onMove);
+    handle.addEventListener("pointerup", finish);
+    handle.addEventListener("pointercancel", finish);
+  };
+
+  /**
+   * Keyboard resizing for the drag handle (accessibility)
+   */
+  const onSidebarHandleKey = (e: KeyboardEvent) => {
+    const step = e.shiftKey ? 64 : 16;
+    let next: number | undefined;
+    if (e.key === "ArrowLeft") next = sidebarWidth() + step;
+    else if (e.key === "ArrowRight") next = sidebarWidth() - step;
+    else if (e.key === "Home") next = SIDEBAR_MIN_WIDTH;
+    else if (e.key === "End") next = SIDEBAR_MAX_WIDTH;
+    if (next === undefined) return;
+    e.preventDefault();
+    state.layout.setChannelSidebarWidth(clampSidebarWidth(next));
   };
 
   // todo: in the future maybe persist per ID?
@@ -322,78 +385,97 @@ export function TextChannel(
           }
         >
           <div
-            ref={sidebarScrollTargetElement}
-            use:scrollable={{
-              direction: "y",
-              showOnHover: true,
-              class: sidebar(),
-            }}
+            ref={sidebarOuterElement}
+            class={sidebarOuter()}
             style={{
               width:
-                sidebarState().state !== "default"
-                  ? `${sidebarWidth()}px`
-                  : "",
+                sidebarState().state !== "default" ? `${sidebarWidth()}px` : "",
             }}
           >
-            <div
-              class="sidebar-drag-handle"
-              onmousedown={startSidebarDrag}
-            />
-            <Switch
-              fallback={
-                <MemberSidebar
-                  channel={props.channel}
-                  scrollTargetElement={sidebarScrollTargetElement}
-                  isLargeServer={LARGE_SERVERS.includes(props.channel.serverId)}
-                />
-              }
-            >
-              <Match when={sidebarState().state === "search"}>
-                <WideSidebarContainer>
-                  <SidebarTitle>
-                    <Text class="label" size="large">
-                      Search Results
-                    </Text>
-                  </SidebarTitle>
-                  <TextSearchSidebar
-                    channel={props.channel}
-                    query={{
-                      query: (sidebarState() as { query: string }).query,
-                    }}
-                  />
-                </WideSidebarContainer>
-              </Match>
-              <Match when={sidebarState().state === "pins"}>
-                <WideSidebarContainer>
-                  <SidebarTitle>
-                    <Text class="label" size="large">
-                      Pinned Messages
-                    </Text>
-                  </SidebarTitle>
-                  <TextSearchSidebar
-                    channel={props.channel}
-                    query={{ pinned: true, sort: "Latest" }}
-                  />
-                </WideSidebarContainer>
-              </Match>
-              <Match when={sidebarState().state === "threads"}>
-                <WideSidebarContainer>
-                  <SidebarTitle>
-                    <Text class="label" size="large">
-                      Threads
-                    </Text>
-                  </SidebarTitle>
-                  <TextThreadsSidebar channel={props.channel} />
-                </WideSidebarContainer>
-              </Match>
-            </Switch>
-
             <Show when={sidebarState().state !== "default"}>
-              <Keybind
-                keybind={KeybindAction.CLOSE_SIDEBAR}
-                onPressed={() => setSidebarState({ state: "default" })}
+              <div
+                class="sidebar-drag-handle"
+                role="separator"
+                aria-orientation="vertical"
+                aria-label="Resize sidebar"
+                aria-valuemin={SIDEBAR_MIN_WIDTH}
+                aria-valuemax={SIDEBAR_MAX_WIDTH}
+                aria-valuenow={sidebarWidth()}
+                tabIndex={0}
+                title="Drag to resize, double-click to reset"
+                onPointerDown={startSidebarDrag}
+                onDblClick={() =>
+                  state.layout.setChannelSidebarWidth(SIDEBAR_DEFAULT_WIDTH)
+                }
+                onKeyDown={onSidebarHandleKey}
               />
             </Show>
+            <div
+              ref={sidebarScrollTargetElement}
+              use:scrollable={{
+                direction: "y",
+                showOnHover: true,
+                class: sidebar(),
+              }}
+            >
+              <Switch
+                fallback={
+                  <MemberSidebar
+                    channel={props.channel}
+                    scrollTargetElement={sidebarScrollTargetElement}
+                    isLargeServer={LARGE_SERVERS.includes(
+                      props.channel.serverId,
+                    )}
+                  />
+                }
+              >
+                <Match when={sidebarState().state === "search"}>
+                  <WideSidebarContainer>
+                    <SidebarTitle>
+                      <Text class="label" size="large">
+                        Search Results
+                      </Text>
+                    </SidebarTitle>
+                    <TextSearchSidebar
+                      channel={props.channel}
+                      query={{
+                        query: (sidebarState() as { query: string }).query,
+                      }}
+                    />
+                  </WideSidebarContainer>
+                </Match>
+                <Match when={sidebarState().state === "pins"}>
+                  <WideSidebarContainer>
+                    <SidebarTitle>
+                      <Text class="label" size="large">
+                        Pinned Messages
+                      </Text>
+                    </SidebarTitle>
+                    <TextSearchSidebar
+                      channel={props.channel}
+                      query={{ pinned: true, sort: "Latest" }}
+                    />
+                  </WideSidebarContainer>
+                </Match>
+                <Match when={sidebarState().state === "threads"}>
+                  <WideSidebarContainer>
+                    <SidebarTitle>
+                      <Text class="label" size="large">
+                        Threads
+                      </Text>
+                    </SidebarTitle>
+                    <TextThreadsSidebar channel={props.channel} />
+                  </WideSidebarContainer>
+                </Match>
+              </Switch>
+
+              <Show when={sidebarState().state !== "default"}>
+                <Keybind
+                  keybind={KeybindAction.CLOSE_SIDEBAR}
+                  onPressed={() => setSidebarState({ state: "default" })}
+                />
+              </Show>
+            </div>
           </div>
         </Show>
       </Content>
@@ -419,13 +501,25 @@ const Content = styled("div", {
  */
 const sidebar = cva({
   base: {
+    flexGrow: 1,
+    minHeight: 0,
+    width: "100%",
+    borderRadius: "var(--borderRadius-lg)",
+  },
+});
+
+/**
+ * Outer (non-scrolling) sidebar wrapper; holds the resize handle so it stays
+ * pinned while the sidebar content scrolls
+ */
+const sidebarOuter = cva({
+  base: {
     flexShrink: 0,
     position: "relative",
+    display: "flex",
+    flexDirection: "column",
+    minHeight: 0,
     width: "var(--layout-width-channel-sidebar)",
-    // margin: "var(--gap-md)",
-    borderRadius: "var(--borderRadius-lg)",
-    // color: "var(--colours-sidebar-channels-foreground)",
-    // background: "var(--colours-sidebar-channels-background)",
   },
 });
 
