@@ -375,6 +375,32 @@ export function AppearanceMenu() {
 
       <Column>
         <Text class="title" size="small">
+          <Trans>Markdown</Trans>
+        </Text>
+
+        <Text class="label">
+          <Trans>Message rendering engine</Trans>
+        </Text>
+        <Row justify="stretch">
+          <Button
+            group="connected-start"
+            groupActive={state.theme.markdownEngine === "markdown"}
+            onPress={() => state.theme.setMarkdownEngine("markdown")}
+          >
+            <Trans>Standard</Trans>
+          </Button>
+          <Button
+            group="connected-end"
+            groupActive={state.theme.markdownEngine === "obsidian"}
+            onPress={() => state.theme.setMarkdownEngine("obsidian")}
+          >
+            <Trans>Obsidian</Trans>
+          </Button>
+        </Row>
+      </Column>
+
+      <Column>
+        <Text class="title" size="small">
           <Trans>Chat Input</Trans>
         </Text>
 

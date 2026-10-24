@@ -14,6 +14,7 @@ import { unified } from "unified";
 import { VFile } from "vfile";
 
 import * as elements from "./elements";
+import "./obsidian.css";
 import { injectEmojiSize } from "./emoji/util";
 import { RenderCodeblock } from "./plugins/Codeblock";
 import { RenderAnchor } from "./plugins/anchors";
@@ -46,6 +47,12 @@ import {
   unicodeEmojiHandler,
 } from "./plugins/unicodeEmoji";
 import { remarkInsertBreaks, sanitise } from "./sanitise";
+import {
+  calloutHandler,
+  highlightHandler,
+  remarkObsidianCallouts,
+  remarkObsidianHighlight,
+} from "./plugins/obsidian";
 import { childrenToSolid } from "./solid-markdown/ast-to-solid";
 import { defaults } from "./solid-markdown/defaults";
 
@@ -244,32 +251,60 @@ const HTML_UNIFIED_PLUGINS = [
   remarkHtmlToText,
 ];
 
-const htmlPipeline = HTML_UNIFIED_PLUGINS.reduce(
-  (pipeline, plugin) => pipeline.use(plugin) as never,
-  unifiedPipeline,
-)
-  // @ts-expect-error non-standard elements not recognised by typing
-  .use(remarkRehype, {
-    handlers: {
-      unicodeEmoji: unicodeEmojiHandler,
-      customEmoji: customEmojiHandler,
-      mention: mentionHandler,
-      timestamp: timestampHandler,
-      spoiler: spoilerHandler,
-    },
-  })
-  .use(remarkInsertBreaks)
-  .use(rehypeKatex, {
-    maxSize: 10,
-    maxExpand: 2,
-    trust: false,
-    strict: false,
-    output: "html",
-    errorColor: "var(--md-sys-color-error)",
-  })
-  .use(rehypeHighlight, {
-    languages: all,
-  });
+const REHYPE_HANDLERS = {
+  unicodeEmoji: unicodeEmojiHandler,
+  customEmoji: customEmojiHandler,
+  mention: mentionHandler,
+  timestamp: timestampHandler,
+  spoiler: spoilerHandler,
+} as const;
+
+/**
+ * Build an htmlpipeline. When `obsidian` is true the Obsidian-flavoured plugins
+ * (callouts, `==highlight==`) are added on top of the exact same pipeline, so the
+ * default ("markdown") engine is unchanged bit-for-bit.
+ */
+function buildHtmlPipeline(obsidian: boolean) {
+  let pipeline = HTML_UNIFIED_PLUGINS.reduce(
+    (pipe, plugin) => pipe.use(plugin) as never,
+    unifiedPipeline,
+  );
+
+  if (obsidian) {
+    pipeline = pipeline.use(remarkObsidianHighlight).use(remarkObsidianCallouts);
+  }
+
+  return pipeline
+    // @ts-expect-error non-standard elements not recognised by typing
+    .use(remarkRehype, {
+      handlers: {
+        ...REHYPE_HANDLERS,
+        ...(obsidian
+          ? { highlight: highlightHandler, callout: calloutHandler }
+          : {}),
+      },
+    })
+    .use(remarkInsertBreaks)
+    .use(rehypeKatex, {
+      maxSize: 10,
+      maxExpand: 2,
+      trust: false,
+      strict: false,
+      output: "html",
+      errorColor: "var(--md-sys-color-error)",
+    })
+    .use(rehypeHighlight, {
+      languages: all,
+    });
+}
+
+const htmlPipeline = buildHtmlPipeline(false);
+
+/**
+ * Obsidian-flavoured render pipeline: everything `htmlPipeline` supports
+ * (tables, strikethrough, task-lists, LaTeX) plus callouts and `==highlight==`.
+ */
+export const obsidianPipeline = buildHtmlPipeline(true);
 
 const replyPipeline = unified()
   .use(remarkParse)
@@ -296,6 +331,13 @@ export interface MarkdownProps {
    * Content to render
    */
   content?: string;
+
+  /**
+   * Which markdown render engine to use.
+   * Defaults to `"markdown"` (the traditional renderer). `"obsidian"` enables
+   * the Obsidian-flavoured extensions (callouts, `==highlight==`).
+   */
+  engine?: "markdown" | "obsidian";
 
   /**
    * Whether to prevent big emoji from rendering
@@ -366,7 +408,8 @@ export function Markdown(props: MarkdownProps) {
     const file = new VFile();
     file.value = sanitise(content);
 
-    const hastNode = htmlPipeline.runSync(htmlPipeline.parse(file), file);
+    const pipeline = props.engine === "obsidian" ? obsidianPipeline : htmlPipeline;
+    const hastNode = pipeline.runSync(pipeline.parse(file), file);
 
     if (hastNode.type !== "root") {
       throw new TypeError("Expected a `root` node");

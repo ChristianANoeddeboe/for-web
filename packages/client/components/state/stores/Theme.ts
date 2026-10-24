@@ -73,6 +73,12 @@ export type TypeTheme = {
    * Spacing between message groups
    */
   messageGroupSpacing: number;
+
+  /**
+   * Markdown render engine used for messages: the traditional `"markdown"`
+   * renderer, or the `"obsidian"`-flavoured one (callouts, highlight).
+   */
+  markdownEngine: "markdown" | "obsidian";
 };
 
 export type SelectedTheme = Pick<
@@ -144,6 +150,8 @@ export class Theme extends AbstractStore<"theme", TypeTheme> {
       blur: true,
       messageSize: 14,
       messageGroupSpacing: 12,
+
+      markdownEngine: "markdown",
     };
   }
 
@@ -198,6 +206,10 @@ export class Theme extends AbstractStore<"theme", TypeTheme> {
 
     if (typeof input.messageGroupSpacing === "number") {
       data.messageGroupSpacing = input.messageGroupSpacing;
+    }
+
+    if (["markdown", "obsidian"].includes(input.markdownEngine!)) {
+      data.markdownEngine = input.markdownEngine!;
     }
 
     if (
@@ -330,6 +342,21 @@ export class Theme extends AbstractStore<"theme", TypeTheme> {
    */
   toggleBlur() {
     this.set("blur", !this.blur);
+  }
+
+  /**
+   * Get current markdown render engine
+   */
+  get markdownEngine() {
+    return this.get().markdownEngine;
+  }
+
+  /**
+   * Set the markdown render engine
+   * @param engine Engine
+   */
+  setMarkdownEngine(engine: TypeTheme["markdownEngine"]) {
+    this.set("markdownEngine", engine);
   }
 
   /**

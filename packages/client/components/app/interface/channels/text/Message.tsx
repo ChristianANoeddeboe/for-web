@@ -362,7 +362,10 @@ export function Message(props: Props) {
           </Match>
           <Match when={props.message.content && !isOnlyGIF()}>
             <BreakText>
-              <Markdown content={props.message.content!} />
+              <Markdown
+                content={props.message.content!}
+                engine={state.theme.markdownEngine}
+              />
             </BreakText>
           </Match>
         </Switch>

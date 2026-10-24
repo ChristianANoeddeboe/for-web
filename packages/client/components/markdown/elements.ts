@@ -157,6 +157,11 @@ export const blockquote = styled("blockquote", {
 export const table = styled("table", {
   base: {
     borderCollapse: "collapse",
+    // Keep wide tables fully visible on narrow (mobile) screens by scrolling
+    // horizontally instead of truncating, matching Obsidian.
+    display: "block",
+    maxWidth: "100%",
+    overflowX: "auto",
   },
 });
 

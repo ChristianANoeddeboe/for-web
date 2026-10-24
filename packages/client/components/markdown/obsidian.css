@@ -1,0 +1,95 @@
+/*
+ * Obsidian-flavoured markdown styling (used by the "obsidian" render engine).
+ * Callouts and ==highlight== elements are emitted as native elements by the
+ * obsidian pipeline; these rules give them Obsidian-like appearance. They are
+ * scoped to the generated `.md-*` classes so the default engine is untouched.
+ */
+
+/* ---- Highlight (==text==) ---- */
+.markdown .md-highlight,
+.md-highlight {
+  background: color-mix(
+    in srgb,
+    var(--md-sys-color-primary, #5470ec) 30%,
+    transparent
+  );
+  border-radius: 2px;
+  padding: 0 2px;
+}
+
+/* ---- Callouts (> [!type]) ---- */
+.markdown .md-callout,
+.md-callout {
+  margin: var(--gap-sm, 8px) 0;
+  padding: var(--gap-sm, 8px) var(--gap-md, 12px);
+  border-radius: var(--borderRadius-md, 8px);
+  border-inline-start: 4px solid
+    var(--md-callout-accent, var(--md-sys-color-outline, #79747e));
+  background: color-mix(
+    in srgb,
+    var(--md-callout-accent, var(--md-sys-color-outline, #79747e)) 10%,
+    transparent
+  );
+}
+
+.mdui .md-callout,
+.markdown .md-callout > .md-callout-title,
+.md-callout::before {
+  content: none;
+}
+
+.md-callout > .md-callout-title {
+  font-weight: 700;
+  margin-bottom: var(--gap-xs, 4px);
+  display: flex;
+  align-items: center;
+  gap: var(--gap-xs, 4px);
+}
+
+.md-callout > .md-callout-title::first-letter {
+  text-transform: capitalize;
+}
+
+/* Per-type accent colours (mirrors Obsidian's callout palette). */
+.md-callout[data-callout="note"],
+.md-callout[data-callout="todo"] {
+  --md-callout-accent: var(--md-sys-color-primary, #5470ec);
+}
+.md-callout[data-callout="abstract"],
+.md-callout[data-callout="summary"],
+.md-callout[data-callout="tldr"],
+.md-callout[data-callout="info"] {
+  --md-callout-accent: var(--md-sys-color-tertiary, #7d5260);
+}
+.md-callout[data-callout="tip"],
+.md-callout[data-callout="hint"],
+.md-callout[data-callout="important"],
+.md-callout[data-callout="success"],
+.md-callout[data-callout="check"],
+.md-callout[data-callout="done"] {
+  --md-callout-accent: #4caf50;
+}
+.md-callout[data-callout="question"],
+.md-callout[data-callout="help"],
+.md-callout[data-callout="faq"] {
+  --md-callout-accent: #03a9f4;
+}
+.md-callout[data-callout="warning"],
+.md-callout[data-callout="caution"],
+.md-callout[data-callout="attention"] {
+  --md-callout-accent: #ff9800;
+}
+.md-callout[data-callout="failure"],
+.md-callout[data-callout="fail"],
+.md-callout[data-callout="missing"],
+.md-callout[data-callout="danger"],
+.md-callout[data-callout="error"],
+.md-callout[data-callout="bug"] {
+  --md-callout-accent: #f44336;
+}
+.md-callout[data-callout="example"] {
+  --md-callout-accent: var(--md-sys-color-secondary, #625b71);
+}
+.md-callout[data-callout="quote"] {
+  --md-callout-accent: var(--md-sys-color-outline-variant, #cac4d0);
+}
