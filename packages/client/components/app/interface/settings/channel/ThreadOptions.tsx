@@ -46,6 +46,7 @@ export function AutoArchiveOptions() {
   const { t } = useLingui();
 
   const labels: Record<(typeof AUTO_ARCHIVE_MINUTES)[number], string> = {
+    0: t`Never`,
     60: t`1 hour`,
     1440: t`24 hours`,
     4320: t`3 days`,
