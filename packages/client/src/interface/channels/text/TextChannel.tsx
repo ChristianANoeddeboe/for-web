@@ -150,7 +150,7 @@ export function TextChannel(
         djAudio.stop();
 
         const channel = props.channel;
-        if (!channel.isDj) return;
+        if (!channel.isDj || !channel.djEnabled) return;
 
         void (async () => {
           await channel.djFetch().catch(() => undefined);
@@ -377,7 +377,7 @@ export function TextChannel(
             <VoiceChannelCallCardMount channel={props.channel} />
           </Show>
 
-          <Show when={props.channel.isDj}>
+          <Show when={props.channel.isDj && props.channel.djEnabled}>
             <DjPanel channel={props.channel} audio={djAudio} />
           </Show>
 

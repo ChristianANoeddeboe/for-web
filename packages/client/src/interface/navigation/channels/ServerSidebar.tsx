@@ -572,7 +572,7 @@ function Entry(
                   headset_mic
                 </Symbol>
               </Match>
-              <Match when={props.channel.isDj}>
+              <Match when={props.channel.isDj && props.channel.djEnabled}>
                 <Symbol
                   color={
                     props.channel.djJoined
@@ -649,7 +649,7 @@ function Entry(
               <TextWithEmoji content={props.channel.name!} />
             </OverflowingText>
           </div>
-          <Show when={props.channel.isDj && props.channel.djMemberCount > 0}>
+          <Show when={props.channel.isDj && props.channel.djEnabled && props.channel.djMemberCount > 0}>
             <DjCount>{props.channel.djMemberCount}</DjCount>
           </Show>
         </Row>
