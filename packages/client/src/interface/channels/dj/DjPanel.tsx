@@ -343,6 +343,14 @@ const DJ_ERROR_MESSAGES: Record<string, string> = {
   CannotJoinDjChannel: "This DJ channel is full.",
   InvalidDjToken: "The stream link expired. Rejoin the channel.",
   CannotSendMessageToDjChannel: "This is a DJ channel. Add a track instead.",
+  DjYoutubeUnsupported:
+    "That link is not a single YouTube video. Paste a video link, not a playlist.",
+  DjYoutubeFailed: "That video could not be downloaded. Try again or upload a file.",
+  DjYoutubeUnavailable: "YouTube links are unavailable on this server.",
+  DjTrackTooLong: "That track is longer than this channel allows.",
+  DjUploadLimit: "You already have the maximum number of tracks queued.",
+  DjQueueFull: "The queue is full. Try again once it has played.",
+  DjStorageFull: "This channel has no storage left.",
 };
 
 export function parseError(err: unknown): string {
@@ -366,6 +374,11 @@ export function parseError(err: unknown): string {
   // Never render a proxy/server HTML error page (e.g. a 413) as chat text.
   if (/<[a-z][\s\S]*>/i.test(raw)) {
     return "The upload failed. The file may be too large.";
+  }
+
+  // A fetch or gateway failure (502/503) has no JSON body at all
+  if (!raw.trim()) {
+    return "The server could not process that request. Try again.";
   }
 
   return raw;

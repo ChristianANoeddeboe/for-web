@@ -4,7 +4,7 @@ import { useLingui } from "@lingui-solid/solid/macro";
 import type { Channel } from "stoat.js";
 import { styled } from "styled-system/jsx";
 
-import { Button, IconButton, Text } from "@revolt/ui";
+import { Button, IconButton, Text, TextField } from "@revolt/ui";
 import { Symbol } from "@revolt/ui/components/utils/Symbol";
 
 import { parseError } from "./DjPanel";
@@ -26,6 +26,8 @@ export function DjComposer(props: Props) {
   const { t } = useLingui();
 
   const [uploading, setUploading] = createSignal(false);
+  const [queueing, setQueueing] = createSignal(false);
+  const [link, setLink] = createSignal("");
   const [error, setError] = createSignal<string>();
 
   let input: HTMLInputElement | undefined;
@@ -34,6 +36,8 @@ export function DjComposer(props: Props) {
 
   const canUpload = () =>
     joined() && !!props.channel.havePermission("UploadFiles");
+
+  const busy = () => uploading() || queueing();
 
   const maxFileMb = () =>
     props.channel.djState?.settings.maxFileMb ??
@@ -48,7 +52,7 @@ export function DjComposer(props: Props) {
    * network/HTML error rather than a useful message.
    */
   async function queue(files: FileList | null) {
-    if (!files || files.length === 0 || uploading()) return;
+    if (!files || files.length === 0 || busy()) return;
 
     setUploading(true);
     setError(undefined);
@@ -71,6 +75,28 @@ export function DjComposer(props: Props) {
     } finally {
       setUploading(false);
       if (input) input.value = "";
+    }
+  }
+
+  /**
+   * Queue the video a YouTube link points at
+   *
+   * The server ignores playlist parameters: only the linked video is added.
+   */
+  async function queueLink() {
+    const url = link().trim();
+    if (!url || !canUpload() || busy()) return;
+
+    setQueueing(true);
+    setError(undefined);
+
+    try {
+      await props.channel.djQueueUrl(url);
+      setLink("");
+    } catch (err) {
+      setError(parseError(err));
+    } finally {
+      setQueueing(false);
     }
   }
 
@@ -98,7 +124,7 @@ export function DjComposer(props: Props) {
         <IconButton
           size="sm"
           variant={canUpload() ? "filled" : "standard"}
-          isDisabled={!canUpload() || uploading()}
+          isDisabled={!canUpload() || busy()}
           onPress={() => input?.click()}
           aria-label={t`Add track to queue`}
         >
@@ -128,13 +154,50 @@ export function DjComposer(props: Props) {
           <Button
             size="sm"
             variant="tonal"
-            isDisabled={uploading()}
+            isDisabled={busy()}
             onPress={() => input?.click()}
           >
             {uploading() ? t`Uploading` : t`Add track`}
           </Button>
         </Show>
       </Row>
+
+      <Show when={canUpload()}>
+        <Row>
+          <div style={{ "min-width": 0, flex: 1 }}>
+            <TextField
+              variant="outlined"
+              type="url"
+              label={t`YouTube link`}
+              placeholder="https://www.youtube.com/watch?v=..."
+              value={link()}
+              disabled={busy()}
+              onInput={(event) => setLink(event.currentTarget.value)}
+              onKeyDown={(event) => {
+                if (event.key === "Enter") {
+                  event.preventDefault();
+                  void queueLink();
+                }
+              }}
+            />
+          </div>
+
+          <Button
+            size="sm"
+            variant="tonal"
+            isDisabled={busy() || !link().trim()}
+            onPress={() => void queueLink()}
+          >
+            {queueing() ? t`Adding` : t`Add link`}
+          </Button>
+        </Row>
+
+        <Text class="label" size="small">
+          {queueing()
+            ? t`Downloading and transcoding the video...`
+            : t`Only the linked video is added; playlist links are not imported.`}
+        </Text>
+      </Show>
 
       <Show when={error()}>
         <ErrorText>{error()}</ErrorText>
