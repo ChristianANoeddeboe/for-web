@@ -332,18 +332,43 @@ export function DjPanel(props: Props) {
 /**
  * Parse an API error body into a message
  */
+const DJ_ERROR_MESSAGES: Record<string, string> = {
+  FileTooLarge: "That file is larger than this channel allows.",
+  FileTooSmall: "That file is empty.",
+  DjTranscodeFailed: "The server could not convert that file to audio.",
+  DjUnavailable: "Audio processing is unavailable on this server.",
+  NotInDjChannel: "Join the channel before adding music.",
+  NotADjChannel: "This channel is not a DJ channel.",
+  DjDisabled: "DJ is disabled on this channel.",
+  CannotJoinDjChannel: "This DJ channel is full.",
+  InvalidDjToken: "The stream link expired. Rejoin the channel.",
+  CannotSendMessageToDjChannel: "This is a DJ channel. Add a track instead.",
+};
+
 export function parseError(err: unknown): string {
-  if (typeof err === "string") {
-    try {
-      const parsed = JSON.parse(err) as { type?: string };
-      return parsed.type ?? err;
-    } catch {
-      return err;
+  const raw =
+    typeof err === "string"
+      ? err
+      : err instanceof Error
+        ? err.message
+        : String(err);
+
+  try {
+    const parsed = JSON.parse(raw) as { type?: string; message?: string };
+    if (parsed.type) {
+      return DJ_ERROR_MESSAGES[parsed.type] ?? parsed.type;
     }
+    if (parsed.message) return parsed.message;
+  } catch {
+    // not JSON
   }
 
-  if (err instanceof Error) return err.message;
-  return String(err);
+  // Never render a proxy/server HTML error page (e.g. a 413) as chat text.
+  if (/<[a-z][\s\S]*>/i.test(raw)) {
+    return "The upload failed. The file may be too large.";
+  }
+
+  return raw;
 }
 
 const Panel = styled("div", {

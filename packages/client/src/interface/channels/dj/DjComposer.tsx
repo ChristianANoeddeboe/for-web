@@ -35,8 +35,17 @@ export function DjComposer(props: Props) {
   const canUpload = () =>
     joined() && !!props.channel.havePermission("UploadFiles");
 
+  const maxFileMb = () =>
+    props.channel.djState?.settings.maxFileMb ??
+    props.channel.dj?.maxFileMb ??
+    50;
+
   /**
    * Queue every selected file, one request each
+   *
+   * Reject files over the channel limit before sending: the server's early
+   * 413 guard closes the connection mid-body, which surfaces as an opaque
+   * network/HTML error rather than a useful message.
    */
   async function queue(files: FileList | null) {
     if (!files || files.length === 0 || uploading()) return;
@@ -46,6 +55,15 @@ export function DjComposer(props: Props) {
 
     try {
       for (const file of Array.from(files)) {
+        const limit = maxFileMb();
+        if (file.size > limit * 1024 * 1024) {
+          const size = (file.size / (1024 * 1024)).toFixed(1);
+          setError(
+            `"${file.name}" is ${size} MB. This channel allows ${limit} MB.`,
+          );
+          continue;
+        }
+
         await props.channel.djQueue(file, file.name.replace(/\.[^.]+$/, ""));
       }
     } catch (err) {
