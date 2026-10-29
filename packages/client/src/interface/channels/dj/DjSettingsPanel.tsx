@@ -83,6 +83,12 @@ export function DjSettingsPanel(props: Props) {
         {t`Only members with Manage Channel can change these`}
       </Text>
 
+      <Show when={!props.channel.djEnabled}>
+        <Text class="label" size="small">
+          {t`Enable DJ to edit these settings`}
+        </Text>
+      </Show>
+
       <Grid>
         <For
           each={[
@@ -142,7 +148,12 @@ export function DjSettingsPanel(props: Props) {
       </Show>
 
       <Row>
-        <Button size="sm" variant="filled" isDisabled={busy()} onPress={save}>
+        <Button
+          size="sm"
+          variant="filled"
+          isDisabled={busy() || !props.channel.djEnabled}
+          onPress={save}
+        >
           {t`Save`}
         </Button>
         <Button

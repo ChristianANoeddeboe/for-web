@@ -3,6 +3,7 @@ import {
   BiRegularListUl,
   BiSolidCloud,
   BiSolidInfoCircle,
+  BiSolidMusic,
   BiSolidPurchaseTag,
   BiSolidTrash,
 } from "solid-icons/bi";
@@ -16,6 +17,7 @@ import { useModals } from "@revolt/modal";
 import { ColouredText } from "@revolt/ui";
 
 import { SettingsConfiguration } from ".";
+import { DjSettingsPanel } from "../../../../src/interface/channels/dj/DjSettingsPanel";
 import ForumTags from "./channel/ForumTags";
 import ChannelOverview from "./channel/Overview";
 import ThreadDefaults from "./channel/ThreadDefaults";
@@ -101,6 +103,8 @@ const Config: SettingsConfiguration<Channel> = {
           default:
             return null;
         }
+      case "dj":
+        return <DjSettingsPanel channel={channel} />;
       case "webhooks":
         return <WebhooksList channel={channel} />;
       default:
@@ -127,6 +131,14 @@ const Config: SettingsConfiguration<Channel> = {
               id: "overview",
               icon: <BiSolidInfoCircle size={20} />,
               title: <Trans>Overview</Trans>,
+            },
+            {
+              hidden:
+                channel.type !== "TextChannel" ||
+                !channel.havePermission("ManageChannel"),
+              id: "dj",
+              icon: <BiSolidMusic size={20} />,
+              title: <Trans>DJ</Trans>,
             },
             {
               hidden:
