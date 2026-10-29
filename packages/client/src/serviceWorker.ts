@@ -3,6 +3,32 @@ import { cleanupOutdatedCaches, precacheAndRoute } from "workbox-precaching";
 
 declare let self: ServiceWorkerGlobalScope;
 
+// Activate a new build immediately instead of waiting for every old tab to
+// close. Without this the previous service worker keeps serving its precached
+// index.html, which can reference hashed assets that the new deploy removed.
+self.addEventListener("install", () => {
+  self.skipWaiting();
+});
+
+self.addEventListener("activate", (event) => {
+  event.waitUntil(self.clients.claim());
+});
+
+// Navigations are network-first: a cached index.html is only a fallback for
+// offline use. Serving a stale shell after a deploy renders a blank app until
+// the user manually reloads.
+self.addEventListener("fetch", (event) => {
+  if (event.request.mode !== "navigate") return;
+
+  event.respondWith(
+    fetch(event.request).catch(async () => {
+      const cached =
+        (await caches.match("/index.html")) || (await caches.match("/"));
+      return cached || Response.error();
+    }),
+  );
+});
+
 interface ChannelPartial {
   channel_type: string;
   name?: string;
