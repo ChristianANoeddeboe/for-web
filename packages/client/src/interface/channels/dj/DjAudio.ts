@@ -64,6 +64,11 @@ export class DjAudio {
     this.#audio.preload = "auto";
     // Keep the element alive but silent until a track is selected
     this.#audio.volume = 1;
+
+    // Attached (without controls) so playback is observable from the DOM and
+    // the element is not garbage collected with the component's scope
+    this.#audio.dataset.djPlayer = "";
+    document.body?.appendChild(this.#audio);
   }
 
   /**
@@ -179,5 +184,6 @@ export class DjAudio {
    */
   destroy(): void {
     this.stop();
+    this.#audio.remove();
   }
 }
