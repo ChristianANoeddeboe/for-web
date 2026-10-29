@@ -40,6 +40,9 @@ import { ChannelPageProps } from "../ChannelPage";
 import { ThreadHeader } from "../ThreadHeader";
 
 import { Channel } from "stoat.js";
+import { DjAudio } from "../dj/DjAudio";
+import { DjComposer } from "../dj/DjComposer";
+import { DjPanel } from "../dj/DjPanel";
 import { MessageComposition } from "./Composition";
 import { MemberSidebar } from "./MemberSidebar";
 import { TextSearchSidebar } from "./TextSearchSidebar";
@@ -134,6 +137,33 @@ export function TextChannel(
   let jumpToBottomRef: ((nearby?: string) => void) | undefined;
 
   const [atEnd, setEnd] = createSignal(true);
+
+  // Audio player for this DJ channel view
+  const djAudio = new DjAudio();
+
+  // Load the DJ state of the channel and, if we are already a member, re-join
+  // to obtain a signed stream URL (`GET .../dj` does not carry one)
+  createEffect(
+    on(
+      () => props.channel.id,
+      () => {
+        djAudio.stop();
+
+        const channel = props.channel;
+        if (!channel.isDj) return;
+
+        void (async () => {
+          await channel.djFetch().catch(() => undefined);
+
+          if (channel.djJoined) {
+            await channel.djJoin().catch(() => undefined);
+          }
+        })();
+      },
+    ),
+  );
+
+  onCleanup(() => djAudio.destroy());
 
   // Store last unread message id
   createEffect(
@@ -347,6 +377,10 @@ export function TextChannel(
             <VoiceChannelCallCardMount channel={props.channel} />
           </Show>
 
+          <Show when={props.channel.isDj}>
+            <DjPanel channel={props.channel} audio={djAudio} />
+          </Show>
+
           <Messages
             channel={props.channel}
             lastReadId={lastId}
@@ -369,10 +403,17 @@ export function TextChannel(
             atEnd={[atEnd, setEnd]}
           />
 
-          <MessageComposition
-            channel={props.channel}
-            onMessageSend={() => jumpToBottomRef?.()}
-          />
+          <Show
+            when={props.channel.isDj && props.channel.djEnabled}
+            fallback={
+              <MessageComposition
+                channel={props.channel}
+                onMessageSend={() => jumpToBottomRef?.()}
+              />
+            }
+          >
+            <DjComposer channel={props.channel} />
+          </Show>
         </main>
         <Show
           when={
