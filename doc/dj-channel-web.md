@@ -41,3 +41,30 @@ already a member of, to obtain a playable URL without waiting up to 15 s.
    `position_ms` on state/TrackStarted/NowPlaying, 15 s heartbeat resync,
    stop on Leave/unmount.
 5. Web: DJ settings panel, gated on `ManageChannel`.
+
+## Status (verified)
+
+Built with `CI=true npx vite build` in `packages/client`: 2636 modules, built in
+~25 s, exit 0 (plus the service-worker build).
+
+End-to-end against https://stoat.noddeboe.dk/api (headless Chromium, local build
+of this branch, live backend):
+
+| Check | Result |
+| --- | --- |
+| Sidebar marks the channel as a DJ channel (headphones badge) | pass |
+| DJ panel renders with a Join prompt while not joined | pass |
+| Join → `POST /dj/join` 200, Leave button, "1 listening", sidebar count | pass |
+| Upload reaches the queue route with the session token | pass |
+| `POST /dj/queue` returns 422 `DjTranscodeFailed` | **backend blocker** |
+| Leave → 204, Join button returns, audio paused with no source | pass |
+
+**Blocker (server side, not the client):** every upload is rejected by the
+deployed delta with `422 {"type":"DjTranscodeFailed","location":"crates/delta/src/dj/transcode.rs:152:17"}`
+— reproduced both through the UI and with a direct `curl` multipart POST, for a
+valid MP3 and a 16-bit PCM WAV, after a successful `dj/join`. That line is the
+"ffmpeg exited non-zero" branch of `transcode::to_mp3`, which encodes with
+`-c:a libmp3lame`; the deployed image almost certainly ships an ffmpeg without
+that encoder. Until it is fixed, no track can be queued, so playback, the 15 s
+heartbeat resync and the skip vote cannot be exercised end to end (they are
+implemented, typechecked and built, but unverified against the live server).
