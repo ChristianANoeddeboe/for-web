@@ -572,6 +572,17 @@ function Entry(
                   headset_mic
                 </Symbol>
               </Match>
+              <Match when={props.channel.isDj}>
+                <Symbol
+                  color={
+                    props.channel.djJoined
+                      ? "var(--md-sys-color-primary)"
+                      : undefined
+                  }
+                >
+                  headphones
+                </Symbol>
+              </Match>
             </Switch>
             <Show when={props.channel.icon}>
               <ChannelIcon
@@ -632,9 +643,16 @@ function Entry(
           </Show>
         }
       >
-        <OverflowingText>
-          <TextWithEmoji content={props.channel.name!} />
-        </OverflowingText>
+        <Row gap="sm" align minWidth={0} style={{ "flex-grow": 1 }}>
+          <div style={{ "min-width": 0, flex: 1 }}>
+            <OverflowingText>
+              <TextWithEmoji content={props.channel.name!} />
+            </OverflowingText>
+          </div>
+          <Show when={props.channel.isDj && props.channel.djMemberCount > 0}>
+            <DjCount>{props.channel.djMemberCount}</DjCount>
+          </Show>
+        </Row>
       </MenuButton>
 
       <VoiceChannelPreview channel={props.channel} />
@@ -730,5 +748,17 @@ const ChannelIcon = styled("img", {
     width: "16px",
     height: "16px",
     objectFit: "contain",
+  },
+});
+
+/**
+ * Amount of listeners shown next to a DJ channel
+ */
+const DjCount = styled("span", {
+  base: {
+    flexShrink: 0,
+    fontSize: "0.75rem",
+    fontWeight: "600",
+    color: "var(--md-sys-color-on-surface-variant)",
   },
 });
