@@ -7,6 +7,7 @@ import { ProfileJoined } from "./ProfileJoined";
 import { ProfileMutuals } from "./ProfileMutuals";
 import { ProfileRoles } from "./ProfileRoles";
 import { ProfileStatus } from "./ProfileStatus";
+import { ProfileUsage } from "./ProfileUsage";
 
 export const Profile = {
   Actions: ProfileActions,
@@ -18,4 +19,5 @@ export const Profile = {
   Mutuals: ProfileMutuals,
   Roles: ProfileRoles,
   Status: ProfileStatus,
+  Usage: ProfileUsage,
 };

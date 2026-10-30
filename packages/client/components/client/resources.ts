@@ -1,6 +1,8 @@
 import { useQuery } from "@tanstack/solid-query";
 import { User } from "stoat.js";
 
+import type { BotUsage } from "@revolt/ui";
+
 import { useClient } from ".";
 
 /**
@@ -49,5 +51,32 @@ export function createOwnBotsResource() {
     queryKey: ["bots", client().user!.id],
     queryFn: () => client().bots.fetchOwned(),
     throwOnError: true,
+  }));
+}
+
+/**
+ * Create a new resource for a bot's published usage limits
+ *
+ * Only the bot's owner may read this (`GET /bots/<id>`), so pass `undefined`
+ * for anything else and the query stays disabled.
+ *
+ * @param botId Bot ID, or an accessor returning one
+ * @returns Usage limits resource
+ */
+export function createBotUsageResource(botId: () => string | undefined) {
+  const client = useClient();
+  return useQuery(() => ({
+    queryKey: ["bot", botId() ?? "", "usage"],
+    queryFn: async (): Promise<BotUsage | undefined> => {
+      const id = botId();
+      if (!id) return undefined;
+      const data = (await client().api.get(`/bots/${id}`)) as {
+        bot?: { usage?: BotUsage };
+      };
+      return data?.bot?.usage;
+    },
+    enabled: !!botId(),
+    throwOnError: false,
+    staleTime: 60_000,
   }));
 }

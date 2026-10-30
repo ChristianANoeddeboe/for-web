@@ -1,12 +1,15 @@
+import { Show } from "solid-js";
+
 import { Trans, useLingui } from "@lingui-solid/solid/macro";
 import { Bot } from "stoat.js";
 
-import { createProfileResource } from "@revolt/client/resources";
+import { createBotUsageResource, createProfileResource } from "@revolt/client/resources";
 import { useModals } from "@revolt/modal";
 import {
   CategoryButton,
   Column,
   iconSize,
+  Profile,
   Symbol,
   useSnackbar,
 } from "@revolt/ui";
@@ -29,6 +32,7 @@ export function ViewBot(props: { bot: Bot }) {
   // `bot` will never change, so we don't care about reactivity here
   // eslint-disable-next-line solid/reactivity
   const profile = createProfileResource(props.bot.user!);
+  const usage = createBotUsageResource(() => props.bot.id);
   const { openModal } = useModals();
   const snackbar = useSnackbar();
   const { t } = useLingui();
@@ -40,6 +44,10 @@ export function ViewBot(props: { bot: Bot }) {
         showBadges
         bannerUrl={profile.data?.animatedBannerURL}
       />
+
+      <Show when={usage.data}>
+        {(data) => <Profile.Usage usage={data()} full />}
+      </Show>
 
       <UserProfileEditor user={props.bot.user!} profile={profile.data} />
       {/* <ErrorBoundary fallback={<>Failed to load profile</>}>
