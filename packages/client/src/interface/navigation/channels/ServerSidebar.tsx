@@ -503,6 +503,7 @@ function Entry(
   const voice = useVoice();
   const { openModal } = useModals();
   const { isMobile } = useDevice();
+  const { t } = useLingui();
 
   const canEditChannel = createMemo(() =>
     (["ManageChannel", "ManagePermissions", "ManageWebhooks"] as const).some(
@@ -536,6 +537,41 @@ function Entry(
           thread.id === params().threadId,
       )
       .sort((a, b) => (a.id < b.id ? -1 : 1)),
+  );
+
+  /**
+   * Persisted per-channel collapse state for the nested thread list
+   *
+   * Defaults to open; the "threads:" prefix keeps it clear of category IDs
+   */
+  const threadsSectionId = () => `threads:${props.channel.id}`;
+  const threadsOpen = () =>
+    state.layout.getSectionState(threadsSectionId(), true);
+  const toggleThreads = () =>
+    state.layout.toggleSectionState(threadsSectionId(), true);
+
+  /**
+   * Threads actually rendered: a collapsed channel still shows the thread we
+   * are currently in, so the sidebar keeps its context
+   */
+  const visibleThreads = createMemo(() =>
+    threadsOpen()
+      ? threads()
+      : threads().filter((thread) => thread.id === params().threadId),
+  );
+
+  /**
+   * Threads hidden by the collapsed list (the open thread stays visible)
+   */
+  const hiddenThreads = createMemo(() =>
+    threads().filter((thread) => !visibleThreads().includes(thread)),
+  );
+
+  /**
+   * Whether any thread is hidden by the collapsed list
+   */
+  const hiddenUnread = createMemo(() =>
+    hiddenThreads().some((thread) => thread.unread),
   );
 
   const attentionState = createMemo(() =>
@@ -652,14 +688,50 @@ function Entry(
           <Show when={props.channel.isDj && props.channel.djEnabled && props.channel.djMemberCount > 0}>
             <DjCount>{props.channel.djMemberCount}</DjCount>
           </Show>
+          <Show when={threads().length}>
+            <ThreadToggle
+              role="button"
+              tabIndex={0}
+              aria-expanded={threadsOpen()}
+              aria-label={
+                threadsOpen() ? t`Collapse threads` : t`Expand threads`
+              }
+              title={threadsOpen() ? t`Collapse threads` : t`Expand threads`}
+              data-hidden-unread={hiddenUnread() || undefined}
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                toggleThreads();
+              }}
+              onKeyDown={(e) => {
+                if (e.key !== "Enter" && e.key !== " ") return;
+                e.preventDefault();
+                e.stopPropagation();
+                toggleThreads();
+              }}
+            >
+              <Show when={hiddenThreads().length}>
+                <span class="count">{hiddenThreads().length}</span>
+              </Show>
+              <Symbol
+                size={16}
+                css={{
+                  transition: "var(--transitions-fast) transform",
+                  transform: threadsOpen() ? undefined : "rotate(-90deg)",
+                }}
+              >
+                expand_more
+              </Symbol>
+            </ThreadToggle>
+          </Show>
         </Row>
       </MenuButton>
 
       <VoiceChannelPreview channel={props.channel} />
 
-      <Show when={threads().length}>
+      <Show when={visibleThreads().length}>
         <Threads>
-          <For each={threads()}>
+          <For each={visibleThreads()}>
             {(thread) => (
               <MenuButton
                 href={thread.path}
@@ -760,5 +832,43 @@ const DjCount = styled("span", {
     fontSize: "0.75rem",
     fontWeight: "600",
     color: "var(--md-sys-color-on-surface-variant)",
+  },
+});
+
+/**
+ * Disclosure toggle for a channel's nested thread list
+ */
+const ThreadToggle = styled("span", {
+  base: {
+    flexShrink: 0,
+    display: "flex",
+    alignItems: "center",
+    gap: "2px",
+    marginInlineEnd: "-4px",
+    padding: "2px 4px",
+    borderRadius: "var(--borderRadius-sm)",
+    cursor: "pointer",
+    color: "inherit",
+    opacity: "0.75",
+
+    "&:hover": {
+      color: "var(--md-sys-color-on-surface)",
+      background: "var(--md-sys-color-surface-container-highest)",
+    },
+
+    "&:focus-visible": {
+      outline: "2px solid var(--md-sys-color-primary)",
+      outlineOffset: "1px",
+    },
+
+    "& .count": {
+      fontSize: "0.75rem",
+      fontWeight: "600",
+    },
+
+    "&[data-hidden-unread]": {
+      color: "var(--md-sys-color-primary)",
+      opacity: "1",
+    },
   },
 });

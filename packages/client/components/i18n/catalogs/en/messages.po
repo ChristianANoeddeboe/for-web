@@ -51,6 +51,13 @@ msgstr "{0, plural, one {# blocked message} other {# blocked messages}}"
 #~ msgid "{0, plural, one {# Member} other {# Members}}"
 #~ msgstr "{0, plural, one {# Member} other {# Members}}"
 
+#. placeholder {0}: thread.messageCount
+#. placeholder {0}: thread()!.messageCount
+#: src/interface/channels/text/TextThreadsSidebar.tsx
+#: components/app/interface/channels/text/ThreadChip.tsx
+msgid "{0, plural, one {# message} other {# messages}}"
+msgstr "{0, plural, one {# message} other {# messages}}"
+
 #. placeholder {0}: items().length
 #: components/ui/components/utils/files/FileDropAnywhereCollector.tsx
 msgid "{0, plural, one {Drop a file} other {Drop # files}}"
@@ -97,6 +104,11 @@ msgstr "{0} joined"
 msgid "{0} left"
 msgstr "{0} left"
 
+#. placeholder {0}: members().length
+#: src/interface/channels/dj/DjPanel.tsx
+msgid "{0} listening"
+msgstr "{0} listening"
+
 #. placeholder {0}: (message.systemMessage as ChannelOwnershipChangeSystemMessage).from ?.username
 #. placeholder {1}: (message.systemMessage as ChannelOwnershipChangeSystemMessage).to ?.username
 #: components/client/NotificationsWorker.tsx
@@ -112,6 +124,12 @@ msgstr "{0} pinned a message"
 #: components/client/NotificationsWorker.tsx
 msgid "{0} renamed the channel"
 msgstr "{0} renamed the channel"
+
+#. placeholder {0}: (message.systemMessage as ThreadCreatedSystemMessage).by?.username
+#. placeholder {1}: (message.systemMessage as ThreadCreatedSystemMessage).name
+#: components/client/NotificationsWorker.tsx
+msgid "{0} started a thread: {1}"
+msgstr "{0} started a thread: {1}"
 
 #. placeholder {0}: (message.systemMessage as MessagePinnedSystemMessage).by?.username
 #: components/client/NotificationsWorker.tsx
@@ -218,6 +236,11 @@ msgstr "<0/> started a call"
 msgid "<0/> started a call that lasted "
 msgstr "<0/> started a call that lasted "
 
+#. placeholder {0}: (props.systemMessage as ThreadCreatedSystemMessage).thread ?.name ?? (props.systemMessage as ThreadCreatedSystemMessage).name
+#: components/ui/components/features/messaging/elements/SystemMessage.tsx
+msgid "<0/> started a thread: <1>{0}</1>"
+msgstr "<0/> started a thread: <1>{0}</1>"
+
 #: components/ui/components/features/messaging/elements/SystemMessage.tsx
 msgid "<0/> transferred group ownership to <1/>"
 msgstr "<0/> transferred group ownership to <1/>"
@@ -249,13 +272,17 @@ msgstr "1 day"
 
 #: src/interface/channels/text/Composition.tsx
 #: src/interface/channels/text/Composition.tsx
+#: components/modal/modals/CreateThread.tsx
 #: components/modal/modals/BanMember.tsx
+#: components/app/interface/settings/channel/ThreadOptions.tsx
+#: components/app/interface/settings/channel/ThreadOptions.tsx
 #: components/app/interface/settings/channel/Overview.tsx
 msgid "1 hour"
 msgstr "1 hour"
 
 #: src/interface/channels/text/Composition.tsx
 #: src/interface/channels/text/Composition.tsx
+#: components/app/interface/settings/channel/ThreadOptions.tsx
 #: components/app/interface/settings/channel/Overview.tsx
 msgid "1 minute"
 msgstr "1 minute"
@@ -268,10 +295,17 @@ msgstr "1 person reacted"
 msgid "1 second"
 msgstr "1 second"
 
+#: components/modal/modals/CreateThread.tsx
+#: components/app/interface/settings/channel/ThreadOptions.tsx
+msgid "1 week"
+msgstr "1 week"
+
+#: components/app/interface/settings/channel/ThreadOptions.tsx
 #: components/app/interface/settings/channel/Overview.tsx
 msgid "10 minutes"
 msgstr "10 minutes"
 
+#: components/app/interface/settings/channel/ThreadOptions.tsx
 #: components/app/interface/settings/channel/Overview.tsx
 msgid "10 seconds"
 msgstr "10 seconds"
@@ -280,35 +314,45 @@ msgstr "10 seconds"
 msgid "12 hours"
 msgstr "12 hours"
 
+#: components/app/interface/settings/channel/ThreadOptions.tsx
 #: components/app/interface/settings/channel/Overview.tsx
 msgid "2 hours"
 msgstr "2 hours"
 
+#: components/modal/modals/CreateThread.tsx
 #: components/app/interface/settings/user/Language.tsx
+#: components/app/interface/settings/channel/ThreadOptions.tsx
 msgid "24 hours"
 msgstr "24 hours"
 
+#: components/modal/modals/CreateThread.tsx
 #: components/modal/modals/BanMember.tsx
+#: components/app/interface/settings/channel/ThreadOptions.tsx
 msgid "3 days"
 msgstr "3 days"
 
+#: components/app/interface/settings/channel/ThreadOptions.tsx
 #: components/app/interface/settings/channel/Overview.tsx
 msgid "30 minutes"
 msgstr "30 minutes"
 
+#: components/app/interface/settings/channel/ThreadOptions.tsx
 #: components/app/interface/settings/channel/Overview.tsx
 msgid "30 seconds"
 msgstr "30 seconds"
 
+#: components/app/interface/settings/channel/ThreadOptions.tsx
 #: components/app/interface/settings/channel/Overview.tsx
 msgid "5 minutes"
 msgstr "5 minutes"
 
+#: components/app/interface/settings/channel/ThreadOptions.tsx
 #: components/app/interface/settings/channel/Overview.tsx
 msgid "5 seconds"
 msgstr "5 seconds"
 
 #: components/modal/modals/BanMember.tsx
+#: components/app/interface/settings/channel/ThreadOptions.tsx
 #: components/app/interface/settings/channel/Overview.tsx
 msgid "6 hours"
 msgstr "6 hours"
@@ -346,6 +390,11 @@ msgstr "Accept friend request"
 msgid "Acknowledge"
 msgstr "Acknowledge"
 
+#: src/interface/channels/text/TextThreadsSidebar.tsx
+msgid "Active"
+msgstr "Active"
+
+#: components/modal/modals/AddThreadMember.tsx
 #: components/modal/modals/AddMembersToGroup.tsx
 #: components/modal/modals/AddBot.tsx
 msgid "Add"
@@ -356,6 +405,10 @@ msgstr "Add"
 msgid "Add a new friend"
 msgstr "Add a new friend"
 
+#: src/interface/channels/dj/DjComposer.tsx
+msgid "Add a track to the queue"
+msgstr "Add a track to the queue"
+
 #: components/app/menus/UserContextMenu.tsx
 msgid "Add friend"
 msgstr "Add friend"
@@ -365,6 +418,18 @@ msgstr "Add friend"
 msgid "Add friends to group"
 msgstr "Add friends to group"
 
+#: src/interface/channels/dj/DjComposer.tsx
+msgid "Add link"
+msgstr "Add link"
+
+#: src/interface/channels/ThreadHeader.tsx
+msgid "Add members"
+msgstr "Add members"
+
+#: components/modal/modals/AddThreadMember.tsx
+msgid "Add members to thread"
+msgstr "Add members to thread"
+
 #: components/app/interface/settings/channel/permissions/ChannelPermissionsEditor.tsx
 msgid "Add new members to the group"
 msgstr "Add new members to the group"
@@ -372,6 +437,22 @@ msgstr "Add new members to the group"
 #: src/interface/navigation/servers/UserMenu.tsx
 msgid "Add status text"
 msgstr "Add status text"
+
+#: components/app/interface/settings/channel/ForumTags.tsx
+msgid "Add tag"
+msgstr "Add tag"
+
+#: src/interface/channels/dj/DjComposer.tsx
+msgid "Add track"
+msgstr "Add track"
+
+#: src/interface/channels/dj/DjComposer.tsx
+msgid "Add track to queue"
+msgstr "Add track to queue"
+
+#: src/interface/channels/dj/DjComposer.tsx
+msgid "Adding"
+msgstr "Adding"
 
 #: components/app/interface/settings/channel/permissions/ChannelPermissionsEditor.tsx
 msgid "Admin"
@@ -393,9 +474,17 @@ msgstr "Advanced"
 msgid "Affects all roles and users"
 msgstr "Affects all roles and users"
 
+#: components/ui/components/features/profiles/ProfileUsage.tsx
+msgid "ago"
+msgstr "ago"
+
 #: src/interface/Friends.tsx
 msgid "All"
 msgstr "All"
+
+#: components/app/menus/ThreadContextMenu.tsx
+msgid "All messages"
+msgstr "All messages"
 
 #: components/app/menus/ServerContextMenu.tsx
 #: components/app/menus/shared/NotificationContextMenu.tsx
@@ -406,6 +495,10 @@ msgstr "All Messages"
 #: src/LoadingScreen.tsx
 msgid "All Systems Operational"
 msgstr "All Systems Operational"
+
+#: components/app/interface/settings/channel/ThreadOverview.tsx
+msgid "Allow anyone to invite others to this thread"
+msgstr "Allow anyone to invite others to this thread"
 
 #: components/app/interface/settings/channel/permissions/ChannelPermissionsEditor.tsx
 msgid "Allow members to change name and avatar per-message"
@@ -440,6 +533,10 @@ msgstr "An internal error occurred. ({0})"
 #: components/app/interface/settings/user/Sync.tsx
 msgid "Appearance"
 msgstr "Appearance"
+
+#: src/interface/channels/text/TextThreadsSidebar.tsx
+msgid "Archived"
+msgstr "Archived"
 
 #: components/modal/modals/SignOutSessions.tsx
 msgid "Are you sure you want to clear your sessions?"
@@ -746,6 +843,7 @@ msgstr "Channel Settings"
 msgid "Channel Slowmode"
 msgstr "Channel Slowmode"
 
+#: components/app/interface/settings/ServerSettings.tsx
 #: components/app/interface/settings/channel/permissions/ChannelPermissionsEditor.tsx
 msgid "Channels"
 msgstr "Channels"
@@ -790,9 +888,11 @@ msgstr "Click to show spoiler"
 msgid "Client Settings"
 msgstr "Client Settings"
 
+#: src/interface/channels/ThreadHeader.tsx
 #: components/modal/modals/UserProfileRoles.tsx
 #: components/modal/modals/UserProfileMutualGroups.tsx
 #: components/modal/modals/UserProfileMutualFriends.tsx
+#: components/modal/modals/ThreadMembers.tsx
 #: components/modal/modals/ServerInfo.tsx
 #: components/modal/modals/PolicyChange.tsx
 #: components/modal/modals/LinkWarning.tsx
@@ -805,14 +905,17 @@ msgstr "Client Settings"
 #: components/modal/modals/DeleteChannel.tsx
 #: components/modal/modals/CustomStatus.tsx
 #: components/modal/modals/CreateWebhook.tsx
+#: components/modal/modals/CreateThread.tsx
 #: components/modal/modals/CreateServer.tsx
 #: components/modal/modals/CreateRole.tsx
 #: components/modal/modals/CreateGroup.tsx
+#: components/modal/modals/CreateForumPost.tsx
 #: components/modal/modals/CreateChannel.tsx
 #: components/modal/modals/CreateCategory.tsx
 #: components/modal/modals/CreateBot.tsx
 #: components/modal/modals/ChannelInfo.tsx
 #: components/modal/modals/Changelog.tsx
+#: components/modal/modals/AddThreadMember.tsx
 #: components/modal/modals/AddMembersToGroup.tsx
 #: components/modal/modals/AddFriend.tsx
 msgid "Close"
@@ -827,9 +930,30 @@ msgstr "Close chat"
 msgid "Close conversation with {0}?"
 msgstr "Close conversation with {0}?"
 
+#: components/app/menus/ThreadContextMenu.tsx
+msgid "Close post"
+msgstr "Close post"
+
+#: components/app/menus/ThreadContextMenu.tsx
+msgid "Close thread"
+msgstr "Close thread"
+
+#: src/interface/channels/ThreadHeader.tsx
+msgid "Closed"
+msgstr "Closed"
+
+#: src/interface/channels/forum/ForumChannel.tsx
+msgid "Closed posts"
+msgstr "Closed posts"
+
 #: components/modal/modals/JoinServer.tsx
 msgid "Code"
 msgstr "Code"
+
+#: src/interface/navigation/channels/ServerSidebar.tsx
+#: src/interface/navigation/channels/ServerSidebar.tsx
+msgid "Collapse threads"
+msgstr "Collapse threads"
 
 #: components/ui/components/features/voice/callCard/VoiceCallCardActions.tsx
 #: components/ui/components/features/voice/callCard/VoiceCallCardActions.tsx
@@ -903,6 +1027,7 @@ msgstr "Copied!"
 msgid "Copy category ID"
 msgstr "Copy category ID"
 
+#: components/app/menus/ThreadContextMenu.tsx
 #: components/app/menus/ChannelContextMenu.tsx
 msgid "Copy channel ID"
 msgstr "Copy channel ID"
@@ -919,6 +1044,7 @@ msgstr "Copy ID"
 msgid "Copy Invite URL"
 msgstr "Copy Invite URL"
 
+#: components/app/menus/ThreadContextMenu.tsx
 #: components/app/menus/MessageContextMenu.tsx
 #: components/app/menus/ChannelContextMenu.tsx
 msgid "Copy link"
@@ -967,6 +1093,7 @@ msgid "Could not find what you requested."
 msgstr "Could not find what you requested."
 
 #: components/modal/modals/CreateWebhook.tsx
+#: components/modal/modals/CreateThread.tsx
 #: components/modal/modals/CreateServer.tsx
 #: components/modal/modals/CreateRole.tsx
 #: components/modal/modals/CreateGroup.tsx
@@ -1055,6 +1182,18 @@ msgstr "Create Invite"
 msgid "Create invites for others to use"
 msgstr "Create invites for others to use"
 
+#: components/app/interface/settings/channel/permissions/ChannelPermissionsEditor.tsx
+msgid "Create posts in this forum"
+msgstr "Create posts in this forum"
+
+#: components/app/interface/settings/channel/permissions/ChannelPermissionsEditor.tsx
+msgid "Create Private Threads"
+msgstr "Create Private Threads"
+
+#: components/app/interface/settings/channel/permissions/ChannelPermissionsEditor.tsx
+msgid "Create Public Threads"
+msgstr "Create Public Threads"
+
 #: components/modal/modals/CreateRole.tsx
 #: components/app/interface/settings/server/roles/ServerRoleOverview.tsx
 msgid "Create Role"
@@ -1068,6 +1207,12 @@ msgstr "Create server"
 msgid "Create server emoji"
 msgstr "Create server emoji"
 
+#: src/interface/channels/text/TextThreadsSidebar.tsx
+#: components/modal/modals/CreateThread.tsx
+#: components/app/menus/MessageContextMenu.tsx
+msgid "Create thread"
+msgstr "Create thread"
+
 #: components/app/interface/settings/channel/webhooks/WebhooksList.tsx
 msgid "Create Webhook"
 msgstr "Create Webhook"
@@ -1075,6 +1220,10 @@ msgstr "Create Webhook"
 #: components/app/interface/settings/user/Sessions.tsx
 msgid "Created <0/>"
 msgstr "Created <0/>"
+
+#: components/app/interface/settings/channel/ThreadDefaults.tsx
+msgid "Creation date"
+msgstr "Creation date"
 
 #: components/modal/modals/EditUsername.tsx
 #: components/modal/modals/EditPassword.tsx
@@ -1129,12 +1278,24 @@ msgstr "Deafen Members"
 msgid "Default"
 msgstr "Default"
 
+#: components/app/interface/settings/channel/ThreadDefaults.tsx
+msgid "Default layout"
+msgstr "Default layout"
+
 #: components/app/interface/settings/ServerSettings.tsx
 #: components/app/interface/settings/ChannelSettings.tsx
 #: components/app/interface/settings/server/roles/ServerRoleOverview.tsx
 #: components/app/interface/settings/channel/permissions/ChannelPermissionsOverview.tsx
 msgid "Default Permissions"
 msgstr "Default Permissions"
+
+#: components/app/interface/settings/channel/ThreadDefaults.tsx
+msgid "Default reaction (emoji or custom emoji ID)"
+msgstr "Default reaction (emoji or custom emoji ID)"
+
+#: components/app/interface/settings/channel/ThreadDefaults.tsx
+msgid "Default sort order"
+msgstr "Default sort order"
 
 #: components/ui/components/features/voice/callCard/VoiceCallCardActions.tsx
 #~ msgid "Defean"
@@ -1205,6 +1366,10 @@ msgstr "Delete message"
 msgid "Delete Message History"
 msgstr "Delete Message History"
 
+#: components/app/menus/ThreadContextMenu.tsx
+msgid "Delete post"
+msgstr "Delete post"
+
 #: components/app/interface/settings/server/roles/ServerRoleEditor.tsx
 msgid "Delete Role"
 msgstr "Delete Role"
@@ -1212,6 +1377,10 @@ msgstr "Delete Role"
 #: components/app/interface/settings/ServerSettings.tsx
 msgid "Delete Server"
 msgstr "Delete Server"
+
+#: components/app/menus/ThreadContextMenu.tsx
+msgid "Delete thread"
+msgstr "Delete thread"
 
 #. placeholder {0}: props.invite.username
 #: components/modal/modals/AddBot.tsx
@@ -1229,6 +1398,10 @@ msgstr "Developer Documentation"
 #: components/app/interface/settings/user/Account.tsx
 msgid "Disable Account"
 msgstr "Disable Account"
+
+#: src/interface/channels/dj/DjSettingsPanel.tsx
+msgid "Disable DJ"
+msgstr "Disable DJ"
 
 #: components/app/interface/settings/user/Account.tsx
 msgid "Disable one-time password authenticator"
@@ -1261,6 +1434,15 @@ msgstr "Display & Text"
 #: components/app/interface/settings/user/profile/UserProfileEditor.tsx
 msgid "Display Name"
 msgstr "Display Name"
+
+#: src/interface/channels/dj/DjPanel.tsx
+#: components/app/interface/settings/ChannelSettings.tsx
+msgid "DJ"
+msgstr "DJ"
+
+#: src/interface/channels/dj/DjPanel.tsx
+msgid "DJ settings"
+msgstr "DJ settings"
 
 #: src/interface/navigation/servers/UserMenu.tsx
 msgid "Do Not Disturb"
@@ -1302,9 +1484,22 @@ msgstr "Donate to Stoat"
 msgid "Donated to Stoat"
 msgstr "Donated to Stoat"
 
+#: src/interface/navigation/channels/ServerSidebar.tsx
 #: components/modal/modals/MFARecovery.tsx
 msgid "Done"
 msgstr "Done"
+
+#: src/interface/channels/dj/DjComposer.tsx
+msgid "Downloading and transcoding the video..."
+msgstr "Downloading and transcoding the video..."
+
+#: src/interface/navigation/channels/ServerSidebar.tsx
+msgid "Drag the handles to reorder channels and categories"
+msgstr "Drag the handles to reorder channels and categories"
+
+#: components/app/interface/settings/server/ChannelReorder.tsx
+msgid "Drag the handles to reorder channels and categories. Order is saved as you go."
+msgstr "Drag the handles to reorder channels and categories. Order is saved as you go."
 
 #: components/modal/modals/ReportContent.tsx
 msgid "Drugs or illegal goods"
@@ -1347,6 +1542,10 @@ msgstr "Edit Identity"
 msgid "Edit message"
 msgstr "Edit message"
 
+#: components/app/menus/ThreadContextMenu.tsx
+msgid "Edit post"
+msgstr "Edit post"
+
 #: components/app/menus/UserContextMenu.tsx
 msgid "Edit roles"
 msgstr "Edit roles"
@@ -1354,6 +1553,10 @@ msgstr "Edit roles"
 #: components/app/interface/settings/channel/permissions/ChannelPermissionsEditor.tsx
 msgid "Edit the server's information and settings"
 msgstr "Edit the server's information and settings"
+
+#: components/app/menus/ThreadContextMenu.tsx
+msgid "Edit thread"
+msgstr "Edit thread"
 
 #: components/app/menus/UserContextMenu.tsx
 #: components/app/menus/ServerContextMenu.tsx
@@ -1375,6 +1578,10 @@ msgstr "Effective <0/> (<1/>)"
 #: components/app/interface/settings/user/Account.tsx
 msgid "Email"
 msgstr "Email"
+
+#: components/app/interface/settings/channel/ForumTags.tsx
+msgid "Emoji"
+msgstr "Emoji"
 
 #: components/app/interface/settings/server/emojis/EmojiList.tsx
 msgid "Emoji Name"
@@ -1399,6 +1606,14 @@ msgstr "Enable authenticator app"
 #: components/app/interface/settings/user/notifications/Notifications.tsx
 msgid "Enable Desktop Notifications"
 msgstr "Enable Desktop Notifications"
+
+#: src/interface/channels/dj/DjSettingsPanel.tsx
+msgid "Enable DJ"
+msgstr "Enable DJ"
+
+#: src/interface/channels/dj/DjSettingsPanel.tsx
+msgid "Enable DJ to edit these settings"
+msgstr "Enable DJ to edit these settings"
 
 #: components/app/interface/settings/user/notifications/Notifications.tsx
 msgid "Enable Push Notifications"
@@ -1454,6 +1669,15 @@ msgstr "Enter your invite code."
 #: components/auth/src/flows/Form.tsx
 msgid "Enter your preferred username."
 msgstr "Enter your preferred username."
+
+#: src/interface/channels/ThreadHeader.tsx
+msgid "Expand"
+msgstr "Expand"
+
+#: src/interface/navigation/channels/ServerSidebar.tsx
+#: src/interface/navigation/channels/ServerSidebar.tsx
+msgid "Expand threads"
+msgstr "Expand threads"
 
 #: components/modal/modals/LinkWarning.tsx
 msgid "External links can be dangerous!"
@@ -1512,6 +1736,14 @@ msgstr "Find your com<0/>munity,<1/>connect with the world."
 msgid "Focus"
 msgstr "Focus"
 
+#: src/interface/channels/ThreadHeader.tsx
+msgid "Follow"
+msgstr "Follow"
+
+#: components/app/menus/ThreadContextMenu.tsx
+msgid "Follow post"
+msgstr "Follow post"
+
 #: components/app/menus/ServerContextMenu.tsx
 #: components/app/menus/shared/NotificationContextMenu.tsx
 msgid "For 1 hour"
@@ -1537,6 +1769,14 @@ msgstr "For 3 hours"
 msgid "For 8 hours"
 msgstr "For 8 hours"
 
+#: components/modal/modals/CreateChannel.tsx
+msgid "Forum Channel"
+msgstr "Forum Channel"
+
+#: components/app/interface/settings/channel/ThreadDefaults.tsx
+msgid "Forum view"
+msgstr "Forum view"
+
 #: src/interface/Friends.tsx
 #: src/interface/navigation/channels/HomeSidebar.tsx
 msgid "Friends"
@@ -1549,6 +1789,14 @@ msgstr "from "
 #: components/app/interface/settings/user/appearance/AppearanceMenu.tsx
 msgid "Fruit Salad"
 msgstr "Fruit Salad"
+
+#: components/app/interface/settings/channel/ThreadDefaults.tsx
+msgid "Gallery"
+msgstr "Gallery"
+
+#: src/interface/channels/forum/ForumChannel.tsx
+msgid "Gallery view"
+msgstr "Gallery view"
 
 #: components/app/interface/settings/user/bots/ViewBot.tsx
 msgid "Generate a new token if it gets lost or compromised"
@@ -1673,6 +1921,12 @@ msgstr "Helped translate Stoat"
 msgid "Here is your new invite code: <0>{0}</0>"
 msgstr "Here is your new invite code: <0>{0}</0>"
 
+#: components/modal/modals/CreateThread.tsx
+#: components/app/interface/settings/channel/ThreadOverview.tsx
+#: components/app/interface/settings/channel/ThreadDefaults.tsx
+msgid "Hide after inactivity"
+msgstr "Hide after inactivity"
+
 #: components/ui/components/features/voice/callCard/VoiceCallCardActiveRoom.tsx
 msgid "Hide Others"
 msgstr "Hide Others"
@@ -1774,6 +2028,7 @@ msgstr "irrelevant joke badge 2"
 msgid "ISO Standard (YYYY-MM-DD)"
 msgstr "ISO Standard (YYYY-MM-DD)"
 
+#: src/interface/channels/dj/DjPanel.tsx
 #: components/modal/modals/JoinServer.tsx
 #: components/modal/modals/Invite.tsx
 msgid "Join"
@@ -1787,6 +2042,10 @@ msgstr "Join a server"
 #~ msgid "Join call"
 #~ msgstr "Join call"
 
+#: src/interface/channels/dj/DjComposer.tsx
+msgid "Join the DJ channel to add music"
+msgstr "Join the DJ channel to add music"
+
 #: src/interface/Home.tsx
 #: components/app/interface/settings/user/Feedback.tsx
 msgid "Join the Stoat Lounge"
@@ -1797,10 +2056,26 @@ msgstr "Join the Stoat Lounge"
 msgid "Join the voice channel"
 msgstr "Join the voice channel"
 
+#: components/app/menus/ThreadContextMenu.tsx
+msgid "Join thread"
+msgstr "Join thread"
+
+#: src/interface/channels/ThreadHeader.tsx
+msgid "Join Thread"
+msgstr "Join Thread"
+
+#: src/interface/channels/dj/DjPanel.tsx
+msgid "Join to listen along"
+msgstr "Join to listen along"
+
 #: components/ui/components/features/profiles/ProfileJoined.tsx
 #: components/ui/components/features/messaging/elements/Invite.tsx
 msgid "Joined"
 msgstr "Joined"
+
+#: src/interface/channels/text/TextThreadsSidebar.tsx
+msgid "Joined threads"
+msgstr "Joined threads"
 
 #: components/ui/components/features/messaging/bars/JumpToBottom.tsx
 msgid "Jump to present"
@@ -1859,6 +2134,7 @@ msgstr "Learn more"
 msgid "Learn more about how to create bots on Stoat."
 msgstr "Learn more about how to create bots on Stoat."
 
+#: src/interface/channels/dj/DjPanel.tsx
 #: components/modal/modals/LeaveServer.tsx
 #: components/modal/modals/DeleteChannel.tsx
 msgid "Leave"
@@ -1879,6 +2155,10 @@ msgstr "Leave group"
 msgid "Leave server"
 msgstr "Leave server"
 
+#: components/app/menus/ThreadContextMenu.tsx
+msgid "Leave thread"
+msgstr "Leave thread"
+
 #: components/app/interface/settings/user/Native.tsx
 msgid "Let Stoat use its own custom titlebar."
 msgstr "Let Stoat use its own custom titlebar."
@@ -1891,6 +2171,18 @@ msgstr "Let us know how we can improve our app by giving us feedback."
 msgid "Light"
 msgstr "Light"
 
+#: components/ui/components/features/profiles/ProfileUsage.tsx
+msgid "Limits"
+msgstr "Limits"
+
+#: components/app/interface/settings/channel/ThreadDefaults.tsx
+msgid "List"
+msgstr "List"
+
+#: src/interface/channels/forum/ForumChannel.tsx
+msgid "List view"
+msgstr "List view"
+
 #: components/app/interface/settings/channel/permissions/ChannelPermissionsEditor.tsx
 msgid "Listen"
 msgstr "Listen"
@@ -1899,6 +2191,16 @@ msgstr "Listen"
 #: components/ui/components/features/messaging/elements/TextFile.tsx
 msgid "Load file ({0})"
 msgstr "Load file ({0})"
+
+#: src/interface/channels/text/TextThreadsSidebar.tsx
+#: src/interface/channels/forum/ForumChannel.tsx
+#: src/interface/channels/forum/ForumChannel.tsx
+msgid "Load more"
+msgstr "Load more"
+
+#: components/app/menus/ThreadContextMenu.tsx
+msgid "Lock"
+msgstr "Lock"
 
 #: components/auth/src/flows/FlowHome.tsx
 msgid "Log In"
@@ -1966,6 +2268,10 @@ msgid "Manage Server"
 msgstr "Manage Server"
 
 #: components/app/interface/settings/channel/permissions/ChannelPermissionsEditor.tsx
+msgid "Manage Threads"
+msgstr "Manage Threads"
+
+#: components/app/interface/settings/channel/permissions/ChannelPermissionsEditor.tsx
 msgid "Manage Webhooks"
 msgstr "Manage Webhooks"
 
@@ -1978,6 +2284,7 @@ msgstr "Mark as mature"
 msgid "Mark as Mature"
 msgstr "Mark as Mature"
 
+#: components/app/menus/ThreadContextMenu.tsx
 #: components/app/menus/ServerContextMenu.tsx
 #: components/app/menus/ChannelContextMenu.tsx
 #: components/app/menus/CategoryContextMenu.tsx
@@ -1992,10 +2299,31 @@ msgstr "Mark as unread"
 msgid "Mark this channel as mature?"
 msgstr "Mark this channel as mature?"
 
+#: components/app/interface/settings/user/appearance/AppearanceMenu.tsx
+msgid "Markdown"
+msgstr "Markdown"
+
 #: components/app/interface/settings/channel/permissions/ChannelPermissionsEditor.tsx
 msgid "Masquerade"
 msgstr "Masquerade"
 
+#: src/interface/channels/dj/DjSettingsPanel.tsx
+msgid "Max file size (MB)"
+msgstr "Max file size (MB)"
+
+#: src/interface/channels/dj/DjSettingsPanel.tsx
+msgid "Max listeners (0 = no limit)"
+msgstr "Max listeners (0 = no limit)"
+
+#: src/interface/channels/dj/DjSettingsPanel.tsx
+msgid "Max queued tracks"
+msgstr "Max queued tracks"
+
+#: src/interface/channels/dj/DjSettingsPanel.tsx
+msgid "Max track length (seconds)"
+msgstr "Max track length (seconds)"
+
+#: src/interface/channels/ThreadHeader.tsx
 #: components/app/interface/settings/ServerSettings.tsx
 #: components/app/interface/settings/channel/permissions/ChannelPermissionsEditor.tsx
 msgid "Members"
@@ -2059,6 +2387,10 @@ msgstr "Message not loaded, click to jump"
 msgid "Message Received"
 msgstr "Message Received"
 
+#: components/app/interface/settings/user/appearance/AppearanceMenu.tsx
+msgid "Message rendering engine"
+msgstr "Message rendering engine"
+
 #: components/app/interface/settings/user/notifications/Sounds.tsx
 msgid "Message Sent"
 msgstr "Message Sent"
@@ -2089,6 +2421,10 @@ msgstr "Minimise to Tray"
 msgid "Missing permission"
 msgstr "Missing permission"
 
+#: components/app/interface/settings/channel/ForumTags.tsx
+msgid "Moderated"
+msgstr "Moderated"
+
 #: components/app/interface/settings/user/appearance/AppearanceMenu.tsx
 msgid "Monochrome"
 msgstr "Monochrome"
@@ -2100,6 +2436,10 @@ msgstr "Monospace Font"
 #: components/app/interface/settings/user/appearance/AppearanceMenu.tsx
 msgid "More Contrast"
 msgstr "More Contrast"
+
+#: src/interface/channels/ThreadHeader.tsx
+msgid "More options"
+msgstr "More options"
 
 #: components/app/interface/settings/channel/permissions/ChannelPermissionsEditor.tsx
 msgid "Move Members"
@@ -2176,6 +2516,11 @@ msgstr "Name"
 msgid "Neutral"
 msgstr "Neutral"
 
+#: components/modal/modals/CreateThread.tsx
+#: components/app/interface/settings/channel/ThreadOptions.tsx
+msgid "Never"
+msgstr "Never"
+
 #: components/ui/components/features/messaging/elements/MessageDivider.tsx
 msgid "NEW"
 msgstr "NEW"
@@ -2190,6 +2535,22 @@ msgstr "New messages since {0}"
 msgid "New Password"
 msgstr "New Password"
 
+#: components/modal/modals/CreateForumPost.tsx
+msgid "New post"
+msgstr "New post"
+
+#: src/interface/channels/forum/ForumChannel.tsx
+msgid "New Post"
+msgstr "New Post"
+
+#: components/app/interface/settings/channel/ThreadDefaults.tsx
+msgid "New posts"
+msgstr "New posts"
+
+#: components/app/interface/settings/channel/ThreadDefaults.tsx
+msgid "New threads"
+msgstr "New threads"
+
 #: components/app/interface/channels/text/Message.tsx
 msgid "New to Stoat"
 msgstr "New to Stoat"
@@ -2202,6 +2563,10 @@ msgstr "New to the server"
 msgid "Nickname"
 msgstr "Nickname"
 
+#: src/interface/channels/text/TextThreadsSidebar.tsx
+msgid "No archived threads"
+msgstr "No archived threads"
+
 #: components/ui/components/features/messaging/composition/picker/GifPicker.tsx
 msgid "No GIFs found"
 msgstr "No GIFs found"
@@ -2209,6 +2574,10 @@ msgstr "No GIFs found"
 #: components/app/interface/settings/channel/permissions/ChannelPermissionsOverview.tsx
 msgid "No permissions set yet"
 msgstr "No permissions set yet"
+
+#: components/modal/modals/ThreadMembers.tsx
+msgid "Nobody has joined yet"
+msgstr "Nobody has joined yet"
 
 #: src/interface/Friends.tsx
 msgid "Nobody here right now!"
@@ -2228,11 +2597,24 @@ msgstr "Normal"
 msgid "Not of minimum age to use the platform"
 msgstr "Not of minimum age to use the platform"
 
+#: components/app/menus/ThreadContextMenu.tsx
+msgid "Nothing"
+msgstr "Nothing"
+
+#: src/interface/channels/dj/DjPanel.tsx
+msgid "Nothing playing"
+msgstr "Nothing playing"
+
+#: components/app/menus/ThreadContextMenu.tsx
 #: components/app/menus/ServerContextMenu.tsx
 #: components/app/menus/shared/NotificationContextMenu.tsx
 #: components/app/interface/settings/UserSettings.tsx
 msgid "Notifications"
 msgstr "Notifications"
+
+#: components/app/interface/settings/user/appearance/AppearanceMenu.tsx
+msgid "Obsidian"
+msgstr "Obsidian"
 
 #: components/ui/components/features/messaging/composition/MessageReplyPreview.tsx
 msgid "Off"
@@ -2291,9 +2673,21 @@ msgstr "Ongoing Maintenance"
 msgid "Online"
 msgstr "Online"
 
+#: components/app/menus/ThreadContextMenu.tsx
+msgid "Only @mentions"
+msgstr "Only @mentions"
+
+#: src/interface/channels/dj/DjSettingsPanel.tsx
+msgid "Only members with Manage Channel can change these"
+msgstr "Only members with Manage Channel can change these"
+
 #: src/interface/navigation/servers/UserMenu.tsx
 msgid "Only mentions will notify you"
 msgstr "Only mentions will notify you"
+
+#: src/interface/channels/dj/DjComposer.tsx
+msgid "Only the linked video is added; playlist links are not imported."
+msgstr "Only the linked video is added; playlist links are not imported."
 
 #: components/modal/modals/Invite.tsx
 msgid "Open"
@@ -2312,6 +2706,10 @@ msgstr "Open channel settings"
 msgid "Open file"
 msgstr "Open file"
 
+#: components/app/menus/ThreadContextMenu.tsx
+msgid "Open post"
+msgstr "Open post"
+
 #: components/app/menus/ServerContextMenu.tsx
 msgid "Open server settings"
 msgstr "Open server settings"
@@ -2320,9 +2718,18 @@ msgstr "Open server settings"
 msgid "Open settings"
 msgstr "Open settings"
 
+#: components/app/menus/ThreadContextMenu.tsx
+#: components/app/menus/MessageContextMenu.tsx
+msgid "Open thread"
+msgstr "Open thread"
+
 #: components/modal/modals/ReportContent.tsx
 msgid "Other"
 msgstr "Other"
+
+#: src/interface/channels/text/TextThreadsSidebar.tsx
+msgid "Other active threads"
+msgstr "Other active threads"
 
 #: components/app/interface/settings/user/voice/VoiceInputOptions.tsx
 msgid "Output Volume"
@@ -2377,6 +2784,10 @@ msgstr "Pin"
 msgid "Pin message"
 msgstr "Pin message"
 
+#: components/app/menus/ThreadContextMenu.tsx
+msgid "Pin post"
+msgstr "Pin post"
+
 #: components/ui/components/features/profiles/ProfileBadges.tsx
 msgid "Platform Moderator"
 msgstr "Platform Moderator"
@@ -2413,6 +2824,23 @@ msgstr "Please select a method to authenticate your request."
 msgid "Please select a reason"
 msgstr "Please select a reason"
 
+#: components/modal/modals/CreateForumPost.tsx
+msgid "Post"
+msgstr "Post"
+
+#: components/app/interface/settings/channel/ThreadOverview.tsx
+msgid "Post Info"
+msgstr "Post Info"
+
+#: components/app/interface/settings/ChannelSettings.tsx
+msgid "Post Settings"
+msgstr "Post Settings"
+
+#: components/modal/modals/CreateForumPost.tsx
+#: components/app/interface/settings/channel/ThreadOverview.tsx
+msgid "Post Title"
+msgstr "Post Title"
+
 #: components/app/interface/settings/user/voice/VoiceProcessingOptions.tsx
 msgid "Powered by RNNoise"
 msgstr "Powered by RNNoise"
@@ -2425,9 +2853,21 @@ msgstr "Privacy"
 msgid "Privacy Policy"
 msgstr "Privacy Policy"
 
+#: src/interface/channels/text/TextThreadsSidebar.tsx
+msgid "Private"
+msgstr "Private"
+
 #: components/markdown/plugins/anchors.tsx
 msgid "Private Channel"
 msgstr "Private Channel"
+
+#: components/markdown/plugins/anchors.tsx
+msgid "Private Thread"
+msgstr "Private Thread"
+
+#: components/modal/modals/CreateThread.tsx
+msgid "Private thread (only people you invite and moderators can see it)"
+msgstr "Private thread (only people you invite and moderators can see it)"
 
 #: components/app/menus/UserContextMenu.tsx
 #: components/app/interface/settings/UserSettings.tsx
@@ -2450,6 +2890,10 @@ msgstr "Pronouns"
 #: components/i18n/errors.tsx
 msgid "Provided email or password is wrong."
 msgstr "Provided email or password is wrong."
+
+#: src/interface/channels/text/TextThreadsSidebar.tsx
+msgid "Public"
+msgstr "Public"
 
 #: components/modal/modals/ReportContent.tsx
 msgid "Raid or spam attack"
@@ -2501,6 +2945,10 @@ msgstr "Receive notifications while the tab is open."
 #: components/app/interface/settings/user/notifications/Notifications.tsx
 msgid "Receive push notifications while the app is closed."
 msgstr "Receive push notifications while the app is closed."
+
+#: components/app/interface/settings/channel/ThreadDefaults.tsx
+msgid "Recent activity"
+msgstr "Recent activity"
 
 #: components/ui/components/features/voice/callCard/VoiceCallCardStatus.tsx
 msgid "Reconnecting"
@@ -2584,6 +3032,27 @@ msgstr "Rename category"
 msgid "Rename Session"
 msgstr "Rename Session"
 
+#: components/app/interface/settings/channel/permissions/ChannelPermissionsEditor.tsx
+msgid "Rename, close, lock and delete threads and forum posts, and see all private threads"
+msgstr "Rename, close, lock and delete threads and forum posts, and see all private threads"
+
+#: components/app/interface/settings/channel/permissions/ChannelPermissionsEditor.tsx
+msgid "Rename, close, lock and delete threads, and see all private threads"
+msgstr "Rename, close, lock and delete threads, and see all private threads"
+
+#: components/app/interface/settings/channel/permissions/ChannelPermissionsEditor.tsx
+msgid "Rename, close, lock, pin and delete posts"
+msgstr "Rename, close, lock, pin and delete posts"
+
+#: components/app/interface/settings/ServerSettings.tsx
+msgid "Reorder"
+msgstr "Reorder"
+
+#: components/app/menus/ServerSidebarContextMenu.tsx
+#: components/app/menus/ServerContextMenu.tsx
+msgid "Reorder channels"
+msgstr "Reorder channels"
+
 #: components/app/interface/settings/user/Native.tsx
 msgid "Rep Stoat using Discord rich presence."
 msgstr "Rep Stoat using Discord rich presence."
@@ -2591,6 +3060,10 @@ msgstr "Rep Stoat using Discord rich presence."
 #: components/app/menus/MessageContextMenu.tsx
 msgid "Reply"
 msgstr "Reply"
+
+#: components/app/interface/settings/channel/permissions/ChannelPermissionsEditor.tsx
+msgid "Reply to posts in this forum"
+msgstr "Reply to posts in this forum"
 
 #: components/ui/components/features/messaging/composition/MessageReplyPreview.tsx
 msgid "Replying to"
@@ -2613,6 +3086,10 @@ msgstr "Report server"
 msgid "Report user"
 msgstr "Report user"
 
+#: components/app/interface/settings/channel/ThreadDefaults.tsx
+msgid "Require people to select at least one tag"
+msgstr "Require people to select at least one tag"
+
 #: components/auth/src/flows/FlowResend.tsx
 msgid "Resend"
 msgstr "Resend"
@@ -2627,6 +3104,7 @@ msgstr "Resend verification"
 #: components/modal/modals/MFARecovery.tsx
 #: components/auth/src/flows/FlowReset.tsx
 #: components/auth/src/flows/FlowConfirmReset.tsx
+#: components/app/interface/settings/channel/ForumTags.tsx
 msgid "Reset"
 msgstr "Reset"
 
@@ -2648,6 +3126,10 @@ msgstr "Reset Recovery Codes"
 #: components/app/interface/settings/user/bots/ViewBot.tsx
 msgid "Reset Token"
 msgstr "Reset Token"
+
+#: components/ui/components/features/profiles/ProfileUsage.tsx
+msgid "resets in"
+msgstr "resets in"
 
 #: components/ui/components/features/profiles/ProfileBadges.tsx
 msgid "Responsibly disclosed security issues"
@@ -2687,12 +3169,16 @@ msgstr "Role Name"
 msgid "Roles"
 msgstr "Roles"
 
+#: src/interface/channels/dj/DjSettingsPanel.tsx
 #: components/modal/modals/ServerIdentity.tsx
 #: components/modal/modals/CustomStatus.tsx
 #: components/app/interface/settings/user/profile/UserProfileEditor.tsx
 #: components/app/interface/settings/server/Overview.tsx
 #: components/app/interface/settings/server/roles/ServerRoleEditor.tsx
+#: components/app/interface/settings/channel/ThreadOverview.tsx
+#: components/app/interface/settings/channel/ThreadDefaults.tsx
 #: components/app/interface/settings/channel/Overview.tsx
+#: components/app/interface/settings/channel/ForumTags.tsx
 #: components/app/interface/settings/channel/webhooks/ViewWebhook.tsx
 msgid "Save"
 msgstr "Save"
@@ -2704,6 +3190,10 @@ msgstr "Save file"
 #: src/interface/channels/text/Composition.tsx
 msgid "Save to your notes"
 msgstr "Save to your notes"
+
+#: src/interface/channels/dj/DjSettingsPanel.tsx
+msgid "Saved"
+msgstr "Saved"
 
 #: src/interface/navigation/channels/HomeSidebar.tsx
 #: src/interface/navigation/channels/HomeSidebar.tsx
@@ -2732,10 +3222,18 @@ msgstr "Search"
 msgid "Search for groups..."
 msgstr "Search for groups..."
 
+#: components/modal/modals/AddThreadMember.tsx
+msgid "Search for members..."
+msgstr "Search for members..."
+
 #: components/modal/modals/CreateGroup.tsx
 #: components/modal/modals/AddMembersToGroup.tsx
 msgid "Search for users..."
 msgstr "Search for users..."
+
+#: src/interface/channels/forum/ForumChannel.tsx
+msgid "Search posts by title"
+msgstr "Search posts by title"
 
 #: components/app/interface/settings/user/Feedback.tsx
 #~ msgid "See what we're currently working on."
@@ -2797,6 +3295,18 @@ msgstr "Send messages in channel"
 #: components/app/interface/settings/channel/permissions/ChannelPermissionsEditor.tsx
 msgid "Send messages in channels"
 msgstr "Send messages in channels"
+
+#: components/app/interface/settings/channel/permissions/ChannelPermissionsEditor.tsx
+msgid "Send Messages in Threads"
+msgstr "Send Messages in Threads"
+
+#: components/app/interface/settings/channel/permissions/ChannelPermissionsEditor.tsx
+msgid "Send messages in threads and forum posts"
+msgstr "Send messages in threads and forum posts"
+
+#: components/app/interface/settings/channel/permissions/ChannelPermissionsEditor.tsx
+msgid "Send messages in threads of this channel"
+msgstr "Send messages in threads of this channel"
 
 #: components/modal/modals/AddFriend.tsx
 msgid "Send Request"
@@ -2896,9 +3406,17 @@ msgstr "Share camera or screen in voice call"
 msgid "Share screen"
 msgstr "Share screen"
 
+#: src/interface/channels/forum/ForumChannel.tsx
+msgid "Show closed posts"
+msgstr "Show closed posts"
+
 #: components/app/interface/settings/user/Native.tsx
 msgid "Show corrections and suggestions as you type."
 msgstr "Show corrections and suggestions as you type."
+
+#: src/interface/channels/ThreadHeader.tsx
+msgid "Show in side panel"
+msgstr "Show in side panel"
 
 #: components/ui/components/features/voice/callCard/VoiceCallCardActiveRoom.tsx
 msgid "Show Others"
@@ -2920,6 +3438,25 @@ msgstr "Sign Up"
 msgid "Silent"
 msgstr "Silent"
 
+#: src/interface/channels/dj/DjPanel.tsx
+msgid "Skip"
+msgstr "Skip"
+
+#. placeholder {0}: state()!.votes
+#. placeholder {1}: votesNeeded()
+#: src/interface/channels/dj/DjPanel.tsx
+msgid "Skip {0}/{1}"
+msgstr "Skip {0}/{1}"
+
+#: src/interface/channels/dj/DjSettingsPanel.tsx
+msgid "Skip threshold (0 - 1)"
+msgstr "Skip threshold (0 - 1)"
+
+#: components/app/interface/settings/channel/ThreadOverview.tsx
+#: components/app/interface/settings/channel/ThreadDefaults.tsx
+msgid "Slowmode"
+msgstr "Slowmode"
+
 #: src/interface/channels/text/Composition.tsx
 msgid "Slowmode Immune"
 msgstr "Slowmode Immune"
@@ -2928,6 +3465,7 @@ msgstr "Slowmode Immune"
 msgid "Slowmode is enabled."
 msgstr "Slowmode is enabled."
 
+#: components/app/interface/settings/channel/ThreadOptions.tsx
 #: components/app/interface/settings/channel/Overview.tsx
 msgid "Slowmode off"
 msgstr "Slowmode off"
@@ -2953,6 +3491,18 @@ msgstr "Something went wrong! {error}"
 #~ msgid "Something went wrong! Try again later."
 #~ msgstr "Something went wrong! Try again later."
 
+#: src/interface/channels/forum/ForumChannel.tsx
+msgid "Sort & view"
+msgstr "Sort & view"
+
+#: src/interface/channels/forum/ForumChannel.tsx
+msgid "Sort by creation date"
+msgstr "Sort by creation date"
+
+#: src/interface/channels/forum/ForumChannel.tsx
+msgid "Sort by recent activity"
+msgstr "Sort by recent activity"
+
 #: components/app/interface/settings/user/notifications/Sounds.tsx
 msgid "Sounds"
 msgstr "Sounds"
@@ -2973,6 +3523,10 @@ msgstr "Speak"
 msgid "Spellchecker"
 msgstr "Spellchecker"
 
+#: components/app/interface/settings/user/appearance/AppearanceMenu.tsx
+msgid "Standard"
+msgstr "Standard"
+
 #: components/ui/components/features/voice/callCard/VoiceCallCardActions.tsx
 msgid "Start camera"
 msgstr "Start camera"
@@ -2985,9 +3539,26 @@ msgstr "Start Minimised to Tray"
 msgid "Start the call"
 msgstr "Start the call"
 
+#: components/app/interface/settings/channel/permissions/ChannelPermissionsEditor.tsx
+msgid "Start threads that everyone can see"
+msgstr "Start threads that everyone can see"
+
+#: components/app/interface/settings/channel/permissions/ChannelPermissionsEditor.tsx
+msgid "Start threads that everyone can see in this channel"
+msgstr "Start threads that everyone can see in this channel"
+
+#: components/app/interface/settings/channel/permissions/ChannelPermissionsEditor.tsx
+#: components/app/interface/settings/channel/permissions/ChannelPermissionsEditor.tsx
+msgid "Start threads that only invited members can see"
+msgstr "Start threads that only invited members can see"
+
 #: components/app/interface/settings/user/Native.tsx
 msgid "Start with Computer"
 msgstr "Start with Computer"
+
+#: components/ui/components/features/messaging/elements/ConversationStart.tsx
+msgid "Started by <0/>"
+msgstr "Started by <0/>"
 
 #: components/ui/components/features/profiles/ProfileStatus.tsx
 msgid "Status"
@@ -3085,6 +3656,25 @@ msgstr "System"
 msgid "System message channels"
 msgstr "System message channels"
 
+#: components/app/interface/settings/channel/ForumTags.tsx
+msgid "Tag name"
+msgstr "Tag name"
+
+#: components/modal/modals/CreateForumPost.tsx
+#: components/app/interface/settings/ChannelSettings.tsx
+#: components/app/interface/settings/channel/ThreadOverview.tsx
+#: components/app/interface/settings/channel/ForumTags.tsx
+msgid "Tags"
+msgstr "Tags"
+
+#: components/modal/modals/CreateForumPost.tsx
+msgid "Tags (at least one required)"
+msgstr "Tags (at least one required)"
+
+#: components/app/interface/settings/channel/ForumTags.tsx
+msgid "Tags help people find and filter posts. Moderated tags can only be applied by members who can manage threads."
+msgstr "Tags help people find and filter posts. Moderated tags can only be applied by members who can manage threads."
+
 #: components/modal/modals/ReportContent.tsx
 msgid "Tell us what's wrong with this message"
 msgstr "Tell us what's wrong with this message"
@@ -3117,6 +3707,10 @@ msgstr "Text Channel"
 msgid "That action had no effect."
 msgstr "That action had no effect."
 
+#: src/interface/channels/dj/DjPanel.tsx
+msgid "The DJ is disabled on this channel"
+msgstr "The DJ is disabled on this channel"
+
 #. placeholder {0}: file.name
 #: src/interface/channels/text/Composition.tsx
 msgid "The file \"{0}\" ({fileSize}) exceeds the maximum size limit of {maxSizeFormatted}."
@@ -3130,9 +3724,21 @@ msgstr "The password is too short."
 msgid "Theme"
 msgstr "Theme"
 
+#: src/interface/channels/text/TextThreadsSidebar.tsx
+msgid "There are no active threads"
+msgstr "There are no active threads"
+
+#: src/interface/channels/forum/ForumChannel.tsx
+msgid "There are no posts yet"
+msgstr "There are no posts yet"
+
 #: components/i18n/errors.tsx
 msgid "This account is not activated! Please check your account's inbox and try again."
 msgstr "This account is not activated! Please check your account's inbox and try again."
+
+#: components/ui/components/features/profiles/ProfileUsage.tsx
+msgid "This bot"
+msgstr "This bot"
 
 #: components/i18n/errors.tsx
 msgid "This bot is private and can only be added by the creator."
@@ -3223,6 +3829,28 @@ msgstr "This username is not allowed."
 msgid "This will invalidate the current token and stop any existing instances of the bot from running."
 msgstr "This will invalidate the current token and stop any existing instances of the bot from running."
 
+#: components/app/interface/settings/channel/ThreadOverview.tsx
+msgid "Thread Info"
+msgstr "Thread Info"
+
+#: components/modal/modals/ThreadMembers.tsx
+msgid "Thread members"
+msgstr "Thread members"
+
+#: components/modal/modals/CreateThread.tsx
+#: components/app/interface/settings/channel/ThreadOverview.tsx
+msgid "Thread Name"
+msgstr "Thread Name"
+
+#: components/app/interface/settings/ChannelSettings.tsx
+msgid "Thread Settings"
+msgstr "Thread Settings"
+
+#: src/interface/channels/ChannelHeader.tsx
+#: components/app/interface/settings/channel/permissions/ChannelPermissionsEditor.tsx
+msgid "Threads"
+msgstr "Threads"
+
 #: components/app/interface/settings/user/Language.tsx
 msgid "Time format"
 msgstr "Time format"
@@ -3255,9 +3883,17 @@ msgstr "Trending GIFs"
 msgid "Troubleshooting"
 msgstr "Troubleshooting"
 
+#: components/ui/components/features/profiles/ProfileUsage.tsx
+msgid "unavailable"
+msgstr "unavailable"
+
 #: components/app/menus/UserContextMenu.tsx
 msgid "Unblock user"
 msgstr "Unblock user"
+
+#: components/app/interface/settings/server/ChannelReorder.tsx
+msgid "Uncategorised"
+msgstr "Uncategorised"
 
 #. placeholder {0}: err.type
 #: components/i18n/errors.tsx
@@ -3269,6 +3905,10 @@ msgstr "Uncaught Stoat error: {0}"
 msgid "Undeafen"
 msgstr "Undeafen"
 
+#: components/app/menus/ThreadContextMenu.tsx
+msgid "Unfollow post"
+msgstr "Unfollow post"
+
 #: src/LoadingScreen.tsx
 msgid "Unknown"
 msgstr "Unknown"
@@ -3278,6 +3918,14 @@ msgstr "Unknown"
 #: components/markdown/plugins/anchors.tsx
 msgid "Unknown Server"
 msgstr "Unknown Server"
+
+#: src/interface/channels/dj/DjPanel.tsx
+msgid "Unknown uploader"
+msgstr "Unknown uploader"
+
+#: components/app/menus/ThreadContextMenu.tsx
+msgid "Unlock"
+msgstr "Unlock"
 
 #: components/modal/modals/ChannelToggleMature.tsx
 msgid "Unmark as mature"
@@ -3313,6 +3961,10 @@ msgstr "Unpin"
 msgid "Unpin message"
 msgstr "Unpin message"
 
+#: components/app/menus/ThreadContextMenu.tsx
+msgid "Unpin post"
+msgstr "Unpin post"
+
 #: components/app/interface/channels/text/DraftMessage.tsx
 msgid "Unsent message"
 msgstr "Unsent message"
@@ -3326,6 +3978,23 @@ msgstr "Unsolicited advertising or spam"
 msgid "Until I turn it back on"
 msgstr "Until I turn it back on"
 
+#: src/interface/channels/dj/DjPanel.tsx
+#: src/interface/channels/dj/DjPanel.tsx
+msgid "Untitled track"
+msgstr "Untitled track"
+
+#: src/interface/channels/dj/DjPanel.tsx
+msgid "Up next"
+msgstr "Up next"
+
+#: components/ui/components/features/profiles/ProfileUsage.tsx
+msgid "updated"
+msgstr "updated"
+
+#: src/interface/channels/dj/DjPanel.tsx
+msgid "Upload failed"
+msgstr "Upload failed"
+
 #: components/app/interface/settings/channel/permissions/ChannelPermissionsEditor.tsx
 msgid "Upload Files"
 msgstr "Upload Files"
@@ -3334,6 +4003,14 @@ msgstr "Upload Files"
 #: components/ui/components/features/messaging/composition/picker/GifPicker.tsx
 msgid "Upload to Gifbox"
 msgstr "Upload to Gifbox"
+
+#: src/interface/channels/dj/DjComposer.tsx
+msgid "Uploading"
+msgstr "Uploading"
+
+#: src/interface/channels/dj/DjComposer.tsx
+msgid "Uploading and transcoding..."
+msgstr "Uploading and transcoding..."
 
 #: components/modal/modals/JoinServer.tsx
 msgid "Use a code or invite link"
@@ -3555,6 +4232,10 @@ msgstr "Would you like to create a new group or server?"
 msgid "Would you like to create a new server or join an existing one?"
 msgstr "Would you like to create a new server or join an existing one?"
 
+#: components/modal/modals/CreateForumPost.tsx
+msgid "Write your post..."
+msgstr "Write your post..."
+
 #: components/app/interface/settings/user/bots/MyBots.tsx
 msgid "You agree that your bot is subject to the Acceptable Usage Policy."
 msgstr "You agree that your bot is subject to the Acceptable Usage Policy."
@@ -3662,6 +4343,10 @@ msgstr "You may be experiencing connection issues."
 msgid "You muted this user."
 msgstr "You muted this user."
 
+#: src/interface/channels/dj/DjComposer.tsx
+msgid "You need permission to upload files in this channel"
+msgstr "You need permission to upload files in this channel"
+
 #: components/auth/src/flows/FlowHome.tsx
 msgid "You were logged out!"
 msgstr "You were logged out!"
@@ -3736,3 +4421,7 @@ msgstr "Your role ranking is too low to take this action."
 #: components/i18n/errors.tsx
 msgid "Your user has already been created? Try logging in again or refreshing the app."
 msgstr "Your user has already been created? Try logging in again or refreshing the app."
+
+#: src/interface/channels/dj/DjComposer.tsx
+msgid "YouTube link"
+msgstr "YouTube link"
