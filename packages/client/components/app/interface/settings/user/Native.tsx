@@ -44,7 +44,9 @@ declare global {
     };
 
     desktopConfig: {
-      get(): DesktopConfig;
+      // Desktop config can be undefined when the app just starts
+      // Fix landing in for-desktop#352 but this undefined asserts handling it.
+      get(): DesktopConfig | undefined;
       set(config: Partial<DesktopConfig>): void;
       getAutostart(): Promise<boolean>;
       setAutostart(value: boolean): Promise<boolean>;
@@ -58,7 +60,9 @@ declare global {
 export default function Native() {
   const { t } = useLingui();
   const [autostart, setAutostart] = createSignal(false);
-  const [config, setConfig] = createSignal(window.desktopConfig.get());
+  // Type assertion is here because we can be certain the desktop config is
+  // defined by time the user gets to the settings page.
+  const [config, setConfig] = createSignal(window.desktopConfig.get()!);
 
   function set(config: Partial<DesktopConfig>) {
     window.desktopConfig.set(config);
