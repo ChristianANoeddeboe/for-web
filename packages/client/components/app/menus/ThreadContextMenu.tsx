@@ -197,13 +197,20 @@ export function ThreadContextMenu(props: { channel: Channel }) {
             <Trans>Unlock</Trans>
           </Show>
         </ContextMenuButton>
-        <Show when={props.channel.isForumPost}>
-          <ContextMenuButton
-            icon={MdPushPin}
-            onClick={() =>
-              props.channel
-                .edit({ pinned: !props.channel.pinned })
-                .catch(showError)
+        <ContextMenuButton
+          icon={MdPushPin}
+          onClick={() =>
+            props.channel
+              .edit({ pinned: !props.channel.pinned })
+              .catch(showError)
+          }
+        >
+          <Show
+            when={props.channel.isForumPost}
+            fallback={
+              <Show when={props.channel.pinned} fallback={<Trans>Pin</Trans>}>
+                <Trans>Unpin</Trans>
+              </Show>
             }
           >
             <Show
@@ -212,8 +219,8 @@ export function ThreadContextMenu(props: { channel: Channel }) {
             >
               <Trans>Unpin post</Trans>
             </Show>
-          </ContextMenuButton>
-        </Show>
+          </Show>
+        </ContextMenuButton>
         <ContextMenuButton
           icon={MdDelete}
           destructive

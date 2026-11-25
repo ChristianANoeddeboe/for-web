@@ -527,16 +527,25 @@ function Entry(
   const params = useSmartParams();
 
   /**
-   * Threads to list under this channel: the ones we joined, and the open one
+   * Threads to list under this channel: the ones we joined, and the open one.
+   * Pinned threads sort to the top, the rest keep creation order.
    */
   const threads = createMemo(() =>
     props.channel.threads
       .filter(
         (thread) =>
-          (thread.joined && !thread.archived) ||
+          ((thread.joined || thread.pinned) && !thread.archived) ||
           thread.id === params().threadId,
       )
-      .sort((a, b) => (a.id < b.id ? -1 : 1)),
+      .sort((a, b) =>
+        a.pinned === b.pinned
+          ? a.id < b.id
+            ? -1
+            : 1
+          : a.pinned
+            ? -1
+            : 1,
+      ),
   );
 
   /**
@@ -551,27 +560,23 @@ function Entry(
     state.layout.toggleSectionState(threadsSectionId(), true);
 
   /**
-   * Threads actually rendered: a collapsed channel still shows the thread we
-   * are currently in, so the sidebar keeps its context
+   * Threads actually rendered: collapsing only hides threads that are already
+   * read, so unread threads stay in view (and the open one keeps its context)
    */
   const visibleThreads = createMemo(() =>
     threadsOpen()
       ? threads()
-      : threads().filter((thread) => thread.id === params().threadId),
+      : threads().filter(
+          (thread) =>
+            thread.id === params().threadId || thread.unread || thread.pinned,
+        ),
   );
 
   /**
-   * Threads hidden by the collapsed list (the open thread stays visible)
+   * Threads hidden by the collapsed list (all read)
    */
   const hiddenThreads = createMemo(() =>
     threads().filter((thread) => !visibleThreads().includes(thread)),
-  );
-
-  /**
-   * Whether any thread is hidden by the collapsed list
-   */
-  const hiddenUnread = createMemo(() =>
-    hiddenThreads().some((thread) => thread.unread),
   );
 
   const attentionState = createMemo(() =>
@@ -697,7 +702,7 @@ function Entry(
                 threadsOpen() ? t`Collapse threads` : t`Expand threads`
               }
               title={threadsOpen() ? t`Collapse threads` : t`Expand threads`}
-              data-hidden-unread={hiddenUnread() || undefined}
+              data-hidden-read={hiddenThreads().length || undefined}
               onClick={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
@@ -752,7 +757,11 @@ function Entry(
                         ? "active"
                         : "normal"
                 }
-                icon={<Symbol size={16}>subdirectory_arrow_right</Symbol>}
+                icon={
+                  <Symbol size={16} fill={thread.pinned}>
+                    {thread.pinned ? "push_pin" : "subdirectory_arrow_right"}
+                  </Symbol>
+                }
               >
                 <OverflowingText>
                   <TextWithEmoji content={thread.name!} />
@@ -864,11 +873,6 @@ const ThreadToggle = styled("span", {
     "& .count": {
       fontSize: "0.75rem",
       fontWeight: "600",
-    },
-
-    "&[data-hidden-unread]": {
-      color: "var(--md-sys-color-primary)",
-      opacity: "1",
     },
   },
 });
