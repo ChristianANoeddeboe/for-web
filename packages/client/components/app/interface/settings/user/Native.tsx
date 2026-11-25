@@ -41,6 +41,11 @@ declare global {
         ) => void,
       ): void;
       screenPickerCallback(idx: number, audio: boolean): void;
+      /**
+       * Follow `stoat://` links opened while the app runs or that launched it
+       * (desktop 1.5.4-selfhosted.4 and later)
+       */
+      onNavigate?(callback: (path: string) => void): void;
     };
 
     desktopConfig: {

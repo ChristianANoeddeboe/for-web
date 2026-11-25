@@ -17,7 +17,12 @@ import { useClient, useClientLifecycle } from "@revolt/client";
 import { State } from "@revolt/client/Controller";
 import { NotificationsWorker } from "@revolt/client/NotificationsWorker";
 import { useModals } from "@revolt/modal";
-import { Navigate, useBeforeLeave, useLocation } from "@revolt/routing";
+import {
+  Navigate,
+  useBeforeLeave,
+  useLocation,
+  useNavigate,
+} from "@revolt/routing";
 import { useState } from "@revolt/state";
 import { LAYOUT_SECTIONS } from "@revolt/state/stores/Layout";
 
@@ -34,6 +39,16 @@ const Interface = (props: { children: JSX.Element }) => {
   const { openModal } = useModals();
   const { isLoggedIn, lifecycle } = useClientLifecycle();
   const { pathname } = useLocation();
+  const navigate = useNavigate();
+
+  // Follow stoat:// links from the desktop app once the client has loaded,
+  // so the target channel exists; the app holds the link until then
+  let followingDeepLinks = false;
+  createEffect(() => {
+    if (followingDeepLinks || !lifecycle.loadedOnce()) return;
+    followingDeepLinks = true;
+    window.native?.onNavigate?.((path) => navigate(path));
+  });
 
   useBeforeLeave((e) => {
     if (!e.defaultPrevented) {
