@@ -19,9 +19,15 @@ export function DeleteBotModal(
   const deleteBot = useMutation(() => ({
     mutationFn: async () => {
       const mfa = await client().account.mfa();
-      await mfaFlow(mfa as never);
+      // only prompt when the account actually has a method to confirm with;
+      // cancelling the prompt must not fall through to deleting the bot
+      if (mfa.availableMethods.length) {
+        const ticket = await mfaFlow(mfa as never);
+        if (!ticket) return;
+      }
       await props.bot.delete(); // TODO: should use ticket in API
     },
+    onSuccess: () => props.onClose(),
     onError: showError,
   }));
 

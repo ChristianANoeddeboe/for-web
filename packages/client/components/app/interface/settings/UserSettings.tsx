@@ -30,6 +30,7 @@ import MdWorkspacePremium from "@material-design-icons/svg/outlined/workspace_pr
 import pkg from "../../../../../../package.json";
 
 import { SettingsConfiguration } from ".";
+import { useSettingsNavigation } from "./Settings";
 import { AccountCard, BackCard } from "./user/_AccountCard";
 import { MyAccount } from "./user/Account";
 import AdvancedSettings from "./user/Advanced";
@@ -51,8 +52,18 @@ const Config: SettingsConfiguration<{ server: Server }> = {
    */
   title(ctx, key) {
     if (key.startsWith("bots/")) {
-      const user = useUser(key.substring(5));
-      return user()!.username;
+      const botId = key.substring(5);
+      const listTitle = ctx.entries
+        .flatMap((category) => category.entries)
+        .find((entry) => entry.id === "bots")?.title as string;
+
+      // a bot can be deleted while its page is still open, in which case the
+      // page itself falls back to the bot list and so must the breadcrumb
+      const client = useClient();
+      if (!client()?.bots.has(botId)) return listTitle;
+
+      const user = useUser(botId);
+      return user()?.username ?? listTitle;
     }
 
     return ctx.entries
@@ -69,10 +80,18 @@ const Config: SettingsConfiguration<{ server: Server }> = {
   render(props) {
     const id = props.page();
     const client = useClient();
+    const { navigate } = useSettingsNavigation();
 
     if (id?.startsWith("bots/")) {
-      const bot = client().bots.get(id.substring("bots/".length))!;
-      return <ViewBot bot={bot!} />;
+      const bot = client().bots.get(id.substring("bots/".length));
+      if (!bot) {
+        // the bot was deleted while its page was still open (this component
+        // re-renders when it leaves the collection); drop back to the list
+        queueMicrotask(() => navigate("bots"));
+        return <MyBots />;
+      }
+
+      return <ViewBot bot={bot} />;
     }
 
     switch (id) {
